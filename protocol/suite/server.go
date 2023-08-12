@@ -6,8 +6,8 @@ import (
 
 	"github.com/favbox/wind/app"
 	"github.com/favbox/wind/common/errors"
-	"github.com/favbox/wind/common/hlog"
 	"github.com/favbox/wind/common/tracer"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/protocol"
 	"github.com/favbox/wind/protocol/consts"
 )
@@ -82,16 +82,16 @@ func (c *Config) Add(protocol string, factory any) {
 	switch factory := factory.(type) {
 	case ServerFactory:
 		if fac := c.configMap[protocol]; fac != nil {
-			hlog.SystemLogger().Warnf("协议 %s 的服务器工厂将被新工厂覆盖", protocol)
+			wlog.SystemLogger().Warnf("协议 %s 的服务器工厂将被新工厂覆盖", protocol)
 		}
 		c.configMap[protocol] = factory
 	case StreamServerFactory:
 		if oldFac := c.streamConfigMap[protocol]; oldFac != nil {
-			hlog.SystemLogger().Warnf("协议 %s 的服务器工厂将被新工厂覆盖", protocol)
+			wlog.SystemLogger().Warnf("协议 %s 的服务器工厂将被新工厂覆盖", protocol)
 		}
 		c.streamConfigMap[protocol] = factory
 	default:
-		hlog.SystemLogger().Fatalf("不支持的服务器工厂类型：%T", factory)
+		wlog.SystemLogger().Fatalf("不支持的服务器工厂类型：%T", factory)
 	}
 }
 

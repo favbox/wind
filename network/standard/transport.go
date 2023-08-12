@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/favbox/wind/common/config"
-	"github.com/favbox/wind/common/hlog"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/network"
 )
 
@@ -71,12 +71,12 @@ func (t *transport) serve() (err error) {
 	if err != nil {
 		return err
 	}
-	hlog.SystemLogger().Infof("HTTP服务器监听地址=%s", t.ln.Addr().String())
+	wlog.SystemLogger().Infof("HTTP服务器监听地址=%s", t.ln.Addr().String())
 	for {
 		ctx := context.Background()
 		conn, err := t.ln.Accept()
 		if err != nil {
-			hlog.SystemLogger().Errorf("错误=%s", err.Error())
+			wlog.SystemLogger().Errorf("错误=%s", err.Error())
 			return err
 		}
 

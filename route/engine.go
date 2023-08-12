@@ -19,11 +19,11 @@ import (
 	"github.com/favbox/wind/app/server/render"
 	"github.com/favbox/wind/common/config"
 	errs "github.com/favbox/wind/common/errors"
-	"github.com/favbox/wind/common/hlog"
 	"github.com/favbox/wind/common/tracer"
 	"github.com/favbox/wind/common/tracer/stats"
 	"github.com/favbox/wind/common/tracer/traceinfo"
 	"github.com/favbox/wind/common/utils"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/internal/bytesconv"
 	"github.com/favbox/wind/internal/bytestr"
 	"github.com/favbox/wind/internal/nocopy"
@@ -241,7 +241,7 @@ func (engine *Engine) Run() (err error) {
 		}
 	}
 
-	hlog.SystemLogger().Infof("使用网络库=%s", engine.GetTransporterName())
+	wlog.SystemLogger().Infof("使用网络库=%s", engine.GetTransporterName())
 	err = engine.transport.ListenAndServe(func(ctx context.Context, conn any) error {
 		switch conn := conn.(type) {
 		case network.Conn:
@@ -321,10 +321,10 @@ func (engine *Engine) Shutdown(ctx context.Context) (err error) {
 		// 确保钩子执行完成或超时
 		select {
 		case <-ctx.Done():
-			hlog.SystemLogger().Infof("执行 OnShutdownHooks 超时：错误=%v", ctx.Err())
+			wlog.SystemLogger().Infof("执行 OnShutdownHooks 超时：错误=%v", ctx.Err())
 			return
 		case <-ch:
-			hlog.SystemLogger().Info("执行 OnShutdownHooks 完成")
+			wlog.SystemLogger().Info("执行 OnShutdownHooks 完成")
 			return
 		}
 	}()
@@ -332,7 +332,7 @@ func (engine *Engine) Shutdown(ctx context.Context) (err error) {
 	// 注销服务
 	if opt := engine.options; opt != nil && opt.Registry != nil {
 		if err = opt.Registry.Deregister(opt.RegistryInfo); err != nil {
-			hlog.SystemLogger().Errorf("服务注销出错 error=%v", err)
+			wlog.SystemLogger().Errorf("服务注销出错 error=%v", err)
 			return err
 		}
 	}
@@ -368,7 +368,7 @@ func (engine *Engine) Serve(ctx context.Context, conn network.Conn) (err error) 
 		if bytes.Equal(buf, bytestr.StrClientPreface) && engine.protocolServers[suite.HTTP2] != nil {
 			return engine.protocolServers[suite.HTTP2].Serve(ctx, conn)
 		}
-		hlog.SystemLogger().Warn("HTTP2 服务器未加载，请求正在回退到 HTTP1 服务器")
+		wlog.SystemLogger().Warn("HTTP2 服务器未加载，请求正在回退到 HTTP1 服务器")
 	}
 
 	// ALPN 协议
@@ -617,7 +617,7 @@ func (engine *Engine) LoadHTMLGlob(pattern string) {
 	if engine.options.AutoReloadRender {
 		files, err := filepath.Glob(pattern)
 		if err != nil {
-			hlog.SystemLogger().Errorf("LoadHTMLGlob: %v", err)
+			wlog.SystemLogger().Errorf("LoadHTMLGlob: %v", err)
 			return
 		}
 		engine.SetAutoReloadHTMLTemplate(tmpl, files)
@@ -716,7 +716,7 @@ func (engine *Engine) getNextProto(conn network.Conn) (proto string, err error) 
 	if tlsConn, ok := conn.(network.ConnTLSer); ok {
 		if engine.options.ReadTimeout > 0 {
 			if err := conn.SetReadTimeout(engine.options.ReadTimeout); err != nil {
-				hlog.SystemLogger().Errorf("BUG: 设置连接的读取超时时长=%s 错误=%s", engine.options.ReadTimeout, err)
+				wlog.SystemLogger().Errorf("BUG: 设置连接的读取超时时长=%s 错误=%s", engine.options.ReadTimeout, err)
 			}
 		}
 		err = tlsConn.Handshake()
@@ -854,7 +854,7 @@ func debugPrintRoute(httpMethod, absolutePath string, handlers app.HandlersChain
 	if handlerName == "" {
 		handlerName = utils.NameOfFunction(handlers.Last())
 	}
-	hlog.SystemLogger().Debugf("方法=%-6s 绝对路径=%-25s --> 处理器名称=%s (%d 个处理器)", httpMethod, absolutePath, handlerName, nHandlers)
+	wlog.SystemLogger().Debugf("方法=%-6s 绝对路径=%-25s --> 处理器名称=%s (%d 个处理器)", httpMethod, absolutePath, handlerName, nHandlers)
 }
 
 func getTransporterName(transporter network.Transporter) (tName string) {
@@ -995,7 +995,7 @@ func errProcess(conn io.Closer, err error) {
 	}
 
 	// 处理其他错误
-	hlog.SystemLogger().Errorf(hlog.EngineErrorFormat, err.Error(), rip)
+	wlog.SystemLogger().Errorf(wlog.EngineErrorFormat, err.Error(), rip)
 }
 
 func getRemoteAddrFromCloser(conn io.Closer) string {

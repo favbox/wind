@@ -12,8 +12,8 @@ import (
 
 	"github.com/favbox/wind/common/config"
 	"github.com/favbox/wind/common/errors"
-	"github.com/favbox/wind/common/hlog"
 	"github.com/favbox/wind/common/utils"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/internal/bytestr"
 	"github.com/favbox/wind/internal/nocopy"
 	"github.com/favbox/wind/network/dialer"
@@ -484,7 +484,7 @@ func (c *Client) mCleaner() {
 				if f, ok := hostClient.(io.Closer); ok {
 					err := f.Close()
 					if err != nil {
-						hlog.Warnf("清理 hostClient 出错，地址：%s，错误：%s", host, err.Error())
+						wlog.Warnf("清理 hostClient 出错，地址：%s，错误：%s", host, err.Error())
 					}
 				}
 			}

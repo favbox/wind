@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/favbox/wind/app"
-	"github.com/favbox/wind/common/hlog"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/protocol/consts"
 )
 
@@ -19,7 +19,7 @@ type Option func(o *options)
 
 // 默认的恐慌恢复处理器。
 func defaultRecoveryHandler(c context.Context, ctx *app.RequestContext, err any, stack []byte) {
-	hlog.SystemLogger().CtxErrorf(c, "[恐慌恢复] 恐慌=%v\n堆栈=%s", err, stack)
+	wlog.SystemLogger().CtxErrorf(c, "[恐慌恢复] 恐慌=%v\n堆栈=%s", err, stack)
 	ctx.AbortWithStatus(consts.StatusInternalServerError)
 }
 

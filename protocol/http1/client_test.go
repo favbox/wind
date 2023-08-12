@@ -18,9 +18,9 @@ import (
 	"github.com/favbox/wind/app/client/retry"
 	"github.com/favbox/wind/common/config"
 	errs "github.com/favbox/wind/common/errors"
-	"github.com/favbox/wind/common/hlog"
 	"github.com/favbox/wind/common/mock"
 	"github.com/favbox/wind/common/utils"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/network"
 	"github.com/favbox/wind/protocol"
 	"github.com/favbox/wind/protocol/client"
@@ -458,7 +458,7 @@ func TestConnInPoolRetry(t *testing.T) {
 	resp := protocol.AcquireResponse()
 
 	logbuf := &bytes.Buffer{}
-	hlog.SetOutput(logbuf)
+	wlog.SetOutput(logbuf)
 
 	err := c.Do(context.Background(), req, resp)
 	assert.Nil(t, err)
@@ -489,7 +489,7 @@ func TestConnNotRetry(t *testing.T) {
 	req.SetOptions(config.WithWriteTimeout(time.Millisecond * 100))
 	resp := protocol.AcquireResponse()
 	logbuf := &bytes.Buffer{}
-	hlog.SetOutput(logbuf)
+	wlog.SetOutput(logbuf)
 	err := c.Do(context.Background(), req, resp)
 	assert.Equal(t, errs.ErrConnectionClosed, err)
 	assert.True(t, logbuf.String() == "")

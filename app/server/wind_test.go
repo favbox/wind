@@ -19,9 +19,9 @@ import (
 	"github.com/favbox/wind/app/server/registry"
 	"github.com/favbox/wind/common/config"
 	errs "github.com/favbox/wind/common/errors"
-	"github.com/favbox/wind/common/hlog"
 	"github.com/favbox/wind/common/mock"
 	"github.com/favbox/wind/common/utils"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/network"
 	"github.com/favbox/wind/network/standard"
 	"github.com/favbox/wind/protocol"
@@ -740,10 +740,10 @@ func (l *lockBuffer) String() string {
 }
 
 func TestSilentMode(t *testing.T) {
-	hlog.SetSilentMode(true)
+	wlog.SetSilentMode(true)
 	b := &lockBuffer{b: bytes.Buffer{}}
 
-	hlog.SetOutput(b)
+	wlog.SetOutput(b)
 
 	h := New(WithHostPorts("localhost:9232"), WithTransport(standard.NewTransporter))
 	h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {

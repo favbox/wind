@@ -10,7 +10,7 @@ import (
 	"github.com/favbox/wind/app/middlewares/server/recovery"
 	"github.com/favbox/wind/common/config"
 	"github.com/favbox/wind/common/errors"
-	"github.com/favbox/wind/common/hlog"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/route"
 )
 
@@ -55,20 +55,20 @@ func (w *Wind) Spin() {
 	}
 
 	if err := signalWaiter(errCh); err != nil {
-		hlog.SystemLogger().Errorf("收到退出信号：错误=%v", err)
+		wlog.SystemLogger().Errorf("收到退出信号：错误=%v", err)
 		if err = w.Engine.Close(); err != nil {
-			hlog.SystemLogger().Errorf("退出错误：%v", err)
+			wlog.SystemLogger().Errorf("退出错误：%v", err)
 		}
 		return
 	}
 
-	hlog.SystemLogger().Infof("开始优雅退出，最多等待 %d 秒...", w.GetOptions().ExitWaitTimeout/time.Second)
+	wlog.SystemLogger().Infof("开始优雅退出，最多等待 %d 秒...", w.GetOptions().ExitWaitTimeout/time.Second)
 
 	ctx, cancel := context.WithTimeout(context.Background(), w.GetOptions().ExitWaitTimeout)
 	defer cancel()
 
 	if err := w.Shutdown(ctx); err != nil {
-		hlog.SystemLogger().Errorf("退出错误：%v", err)
+		wlog.SystemLogger().Errorf("退出错误：%v", err)
 	}
 }
 
@@ -88,7 +88,7 @@ func (w *Wind) initOnRunHooks(errChan chan error) {
 			// 延迟 1 秒再注册
 			time.Sleep(1 * time.Second)
 			if err := opts.Registry.Register(opts.RegistryInfo); err != nil {
-				hlog.SystemLogger().Errorf("服务注册出错：%v", err)
+				wlog.SystemLogger().Errorf("服务注册出错：%v", err)
 				// 传递错误到错误通道
 				errChan <- err
 			}
@@ -123,7 +123,7 @@ func defaultSignalWaiter(errCh chan error) error {
 			// 强制退出
 			return errors.NewPublic(sig.String())
 		case syscall.SIGHUP, syscall.SIGINT:
-			hlog.SystemLogger().Infof("收到退出信号：%s\n", sig)
+			wlog.SystemLogger().Infof("收到退出信号：%s\n", sig)
 			// 优雅退出
 			return nil
 		}

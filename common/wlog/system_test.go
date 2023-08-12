@@ -1,4 +1,4 @@
-package hlog
+package wlog
 
 import (
 	"log"

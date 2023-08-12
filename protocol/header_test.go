@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/favbox/wind/common/hlog"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/internal/bytestr"
 	"github.com/favbox/wind/protocol/consts"
 	"github.com/stretchr/testify/assert"
@@ -354,7 +354,7 @@ func TestRequestHeaderResetConnectionClose(t *testing.T) {
 
 func TestCheckWriteHeaderCode(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
-	hlog.SetOutput(buffer)
+	wlog.SetOutput(buffer)
 	checkWriteHeaderCode(99)
 	assert.True(t, strings.Contains(buffer.String(), "[Warn] WIND: 无效状态码"))
 	buffer.Reset()

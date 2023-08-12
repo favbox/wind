@@ -10,7 +10,7 @@ import (
 	"time"
 
 	errs "github.com/favbox/wind/common/errors"
-	"github.com/favbox/wind/common/hlog"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/network"
 )
 
@@ -155,7 +155,7 @@ func (c *Conn) CloseNoResetBuffer() error {
 
 func (c *Conn) HandleSpecificError(err error, rip string) (needIgnore bool) {
 	if errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET) {
-		hlog.SystemLogger().Debugf("Go 网络库 错误=%s, 远程地址=%s", err.Error(), rip)
+		wlog.SystemLogger().Debugf("Go 网络库 错误=%s, 远程地址=%s", err.Error(), rip)
 		return true
 	}
 	return false

@@ -19,8 +19,8 @@ import (
 	"github.com/favbox/wind/common/bytebufferpool"
 	"github.com/favbox/wind/common/compress"
 	"github.com/favbox/wind/common/errors"
-	"github.com/favbox/wind/common/hlog"
 	"github.com/favbox/wind/common/utils"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/internal/bytesconv"
 	"github.com/favbox/wind/internal/bytestr"
 	"github.com/favbox/wind/internal/nocopy"
@@ -196,7 +196,7 @@ func (h *fsHandler) handleRequest(c context.Context, ctx *RequestContext) {
 	path = stripTrailingSlashes(path)
 
 	if n := bytes.IndexByte(path, 0); n >= 0 {
-		hlog.SystemLogger().Errorf("无法提供空路径服务，位置=%d，路径=%q", n, path)
+		wlog.SystemLogger().Errorf("无法提供空路径服务，位置=%d，路径=%q", n, path)
 		ctx.AbortWithMsg("你是黑客吗？", consts.StatusBadRequest)
 		return
 	}
@@ -205,7 +205,7 @@ func (h *fsHandler) handleRequest(c context.Context, ctx *RequestContext) {
 		// 若 path 来自 ctx.Path() 则无需检查 '/../'，因为 ctx.Path() 已进行规范化。
 
 		if n := bytes.Index(path, bytestr.StrSlashDotDotSlash); n >= 0 {
-			hlog.SystemLogger().Errorf("由于安全原因，无法提供带有 '/../' 的路径服务，位置=%d，路径=%q", n, path)
+			wlog.SystemLogger().Errorf("由于安全原因，无法提供带有 '/../' 的路径服务，位置=%d，路径=%q", n, path)
 			ctx.AbortWithMsg("内部服务器错误", consts.StatusInternalServerError)
 			return
 		}
@@ -236,7 +236,7 @@ func (h *fsHandler) handleRequest(c context.Context, ctx *RequestContext) {
 		ff, err = h.openFSFile(filePath, mustCompress)
 
 		if mustCompress && err == errNoCreatePermission {
-			hlog.SystemLogger().Errorf("权限不足，无法保存压缩文件 %q。正在提供未压缩文件。"+
+			wlog.SystemLogger().Errorf("权限不足，无法保存压缩文件 %q。正在提供未压缩文件。"+
 				"授予该文件所在目录的写权限，可提高服务器性能。", filePath)
 			mustCompress = false
 			ff, err = h.openFSFile(filePath, mustCompress)
@@ -244,12 +244,12 @@ func (h *fsHandler) handleRequest(c context.Context, ctx *RequestContext) {
 		if err == errDirIndexRequired {
 			ff, err = h.openIndexFile(ctx, filePath, mustCompress)
 			if err != nil {
-				hlog.SystemLogger().Errorf("无法打开目录索引文件，路径=%q, 错误=%s", filePath, err)
+				wlog.SystemLogger().Errorf("无法打开目录索引文件，路径=%q, 错误=%s", filePath, err)
 				ctx.AbortWithMsg("目录索引被禁止", consts.StatusForbidden)
 				return
 			}
 		} else if err != nil {
-			hlog.SystemLogger().Errorf("无法打开文件，路径=%q, 错误=%s", filePath, err)
+			wlog.SystemLogger().Errorf("无法打开文件，路径=%q, 错误=%s", filePath, err)
 			if h.pathNotFound == nil {
 				ctx.AbortWithMsg("无法打开请求的路径", consts.StatusNotFound)
 			} else {
@@ -286,7 +286,7 @@ func (h *fsHandler) handleRequest(c context.Context, ctx *RequestContext) {
 	// 内容已修改，读取原始文件
 	r, err := ff.NewReader()
 	if err != nil {
-		hlog.SystemLogger().Errorf("无法获取文件读取器，路径=%q，错误=%s", path, err)
+		wlog.SystemLogger().Errorf("无法获取文件读取器，路径=%q，错误=%s", path, err)
 		ctx.AbortWithMsg("内部服务器错误", consts.StatusInternalServerError)
 		return
 	}
@@ -306,14 +306,14 @@ func (h *fsHandler) handleRequest(c context.Context, ctx *RequestContext) {
 			startPos, endPos, err := ParseByteRange(byteRange, contentLength)
 			if err != nil {
 				r.(io.Closer).Close()
-				hlog.SystemLogger().Errorf("无法解析字节区间 %q，路径=%q，错误=%s", byteRange, path, err)
+				wlog.SystemLogger().Errorf("无法解析字节区间 %q，路径=%q，错误=%s", byteRange, path, err)
 				ctx.AbortWithMsg("无法处理所请求的数据区间，可能不在文件范围之内", consts.StatusRequestedRangeNotSatisfiable)
 				return
 			}
 
 			if err = r.(byteRangeUpdater).UpdateByteRange(startPos, endPos); err != nil {
 				r.(io.Closer).Close()
-				hlog.SystemLogger().Errorf("无法更新字节区间 %q，路径=%q，错误=%s", byteRange, path, err)
+				wlog.SystemLogger().Errorf("无法更新字节区间 %q，路径=%q，错误=%s", byteRange, path, err)
 				ctx.AbortWithMsg("内部服务器错误", consts.StatusInternalServerError)
 				return
 			}
@@ -334,7 +334,7 @@ func (h *fsHandler) handleRequest(c context.Context, ctx *RequestContext) {
 		ctx.Response.Header.SetContentLength(contentLength)
 		if rc, ok := r.(io.Closer); ok {
 			if err := rc.Close(); err != nil {
-				hlog.SystemLogger().Errorf("无法关闭文件读取器：错误=%s", err)
+				wlog.SystemLogger().Errorf("无法关闭文件读取器：错误=%s", err)
 				ctx.AbortWithMsg("内部服务器错误", consts.StatusInternalServerError)
 				return
 			}
@@ -1127,7 +1127,7 @@ func ServeFile(ctx *RequestContext, path string) {
 		// 将相对路径扩展为绝对路径
 		var err error
 		if path, err = filepath.Abs(path); err != nil {
-			hlog.SystemLogger().Errorf("无法将相对路径 %q 解析为绝对路径，错误=%s", path, err)
+			wlog.SystemLogger().Errorf("无法将相对路径 %q 解析为绝对路径，错误=%s", path, err)
 			ctx.AbortWithMsg("内部服务器错误", consts.StatusInternalServerError)
 			return
 		}

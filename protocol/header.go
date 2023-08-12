@@ -8,8 +8,8 @@ import (
 	"time"
 
 	errs "github.com/favbox/wind/common/errors"
-	"github.com/favbox/wind/common/hlog"
 	"github.com/favbox/wind/common/utils"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/internal/bytesconv"
 	"github.com/favbox/wind/internal/bytestr"
 	"github.com/favbox/wind/internal/nocopy"
@@ -1597,7 +1597,7 @@ func checkWriteHeaderCode(code int) {
 	// 目前，我们只对坏代码发出警告。
 	// 在未来，我们可能会阻止599以上或100以下的东西
 	if code < 100 || code > 599 {
-		hlog.SystemLogger().Warnf("无效状态码 %v，状态码不应低于 100 或超过 599\n"+
+		wlog.SystemLogger().Warnf("无效状态码 %v，状态码不应低于 100 或超过 599\n"+
 			"了解详情 https://www.rfc-editor.org/rfc/rfc9110.html#name-status-codes", code)
 	}
 }

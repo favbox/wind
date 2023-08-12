@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/favbox/wind/common/hlog"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/protocol"
 	"github.com/fsnotify/fsnotify"
 )
@@ -110,11 +110,11 @@ func (r *HTMLDebug) startChecker() {
 	// 按指定间隔重载
 	if r.RefreshInterval > 0 {
 		go func() {
-			hlog.SystemLogger().Debugf("[HTMLDebug] HTML 模板间隔 %v 重载一次", r.RefreshInterval)
+			wlog.SystemLogger().Debugf("[HTMLDebug] HTML 模板间隔 %v 重载一次", r.RefreshInterval)
 			for range time.Tick(r.RefreshInterval) {
-				hlog.SystemLogger().Debugf("[HTMLDebug] 正在触发 HTML 模板重载")
+				wlog.SystemLogger().Debugf("[HTMLDebug] 正在触发 HTML 模板重载")
 				r.reloadCh <- struct{}{}
-				hlog.SystemLogger().Debugf("[HTMLDebug] HTML 模板已重载，下次于 %v 后重载", r.RefreshInterval)
+				wlog.SystemLogger().Debugf("[HTMLDebug] HTML 模板已重载，下次于 %v 后重载", r.RefreshInterval)
 			}
 		}()
 		return
@@ -128,14 +128,14 @@ func (r *HTMLDebug) startChecker() {
 	r.watcher = watcher
 	for _, f := range r.Files {
 		err := watcher.Add(f)
-		hlog.SystemLogger().Debugf("[HTMLDebug] 正在监视文件：%s", f)
+		wlog.SystemLogger().Debugf("[HTMLDebug] 正在监视文件：%s", f)
 		if err != nil {
-			hlog.SystemLogger().Errorf("[HTMLDebug] 添加监视文件：%s，出现错误：%v", f, err)
+			wlog.SystemLogger().Errorf("[HTMLDebug] 添加监视文件：%s，出现错误：%v", f, err)
 		}
 	}
 
 	go func() {
-		hlog.SystemLogger().Debugf("[HTMLDebug] HTML 模板将通过文件监听自动重载 ")
+		wlog.SystemLogger().Debugf("[HTMLDebug] HTML 模板将通过文件监听自动重载 ")
 		for {
 			select {
 			case event, ok := <-watcher.Events:
@@ -143,15 +143,15 @@ func (r *HTMLDebug) startChecker() {
 					return
 				}
 				if event.Op&fsnotify.Write == fsnotify.Write {
-					hlog.SystemLogger().Debugf("[HTMLDebug] 修改的文件：%s，HTML 模板将在下次渲染时重载", event.Name)
+					wlog.SystemLogger().Debugf("[HTMLDebug] 修改的文件：%s，HTML 模板将在下次渲染时重载", event.Name)
 					r.reloadCh <- struct{}{}
-					hlog.SystemLogger().Debugf("[HTMLDebug] HTML模板已重载")
+					wlog.SystemLogger().Debugf("[HTMLDebug] HTML模板已重载")
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {
 					return
 				}
-				hlog.SystemLogger().Errorf("错误发生于监视渲染文件：%v", err)
+				wlog.SystemLogger().Errorf("错误发生于监视渲染文件：%v", err)
 			}
 		}
 	}()

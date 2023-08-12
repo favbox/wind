@@ -9,7 +9,7 @@ import (
 
 	"github.com/favbox/wind/common/bytebufferpool"
 	errs "github.com/favbox/wind/common/errors"
-	"github.com/favbox/wind/common/hlog"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/network"
 	"github.com/favbox/wind/protocol"
 	"github.com/favbox/wind/protocol/consts"
@@ -243,7 +243,7 @@ func (c *clientRespStream) Close() error {
 	shouldClose := false
 	if err != nil {
 		shouldClose = true
-		hlog.Warnf("连接即将关闭而非回收，因为在正文流释放过程中发生了错误：%s", err.Error())
+		wlog.Warnf("连接即将关闭而非回收，因为在正文流释放过程中发生了错误：%s", err.Error())
 	}
 	if c.closeCallback != nil {
 		err = c.closeCallback(shouldClose)

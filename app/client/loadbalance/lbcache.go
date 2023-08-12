@@ -9,7 +9,7 @@ import (
 
 	"github.com/favbox/wind/app/client/discovery"
 	"github.com/favbox/wind/common/errors"
-	"github.com/favbox/wind/common/hlog"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/protocol"
 	"golang.org/x/sync/singleflight"
 )
@@ -90,7 +90,7 @@ func (b *BalancerFactory) refresh() {
 		b.cache.Range(func(key, value interface{}) bool {
 			res, err := b.resolver.Resolve(context.Background(), key.(string))
 			if err != nil {
-				hlog.SystemLogger().Warnf("解析器刷新失败, 缓存建=%s 错误=%s", key, err.Error())
+				wlog.SystemLogger().Warnf("解析器刷新失败, 缓存建=%s 错误=%s", key, err.Error())
 				return true
 			}
 			renameResultCacheKey(&res, b.resolver.Name())
@@ -117,7 +117,7 @@ func (b *BalancerFactory) GetInstance(ctx context.Context, req *protocol.Request
 	atomic.StoreInt32(&cacheRes.expire, 0)
 	ins := b.balancer.Pick(cacheRes.res.Load().(discovery.Result))
 	if ins == nil {
-		hlog.SystemLogger().Errorf("null instance. serviceName: %s, options: %v", string(req.Host()), req.Options())
+		wlog.SystemLogger().Errorf("null instance. serviceName: %s, options: %v", string(req.Host()), req.Options())
 		return nil, errors.NewPublic("instance not found")
 	}
 	return ins, nil

@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/favbox/wind/common/errors"
-	"github.com/favbox/wind/common/hlog"
 	"github.com/favbox/wind/common/utils"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/internal/bytesconv"
 	"github.com/favbox/wind/internal/bytestr"
 	"github.com/favbox/wind/internal/nocopy"
@@ -470,7 +470,7 @@ func getCookieKey(dst, src []byte) []byte {
 func warnIfInvalid(value []byte) bool {
 	for i := range value {
 		if bytesconv.ValidCookieValueTable[value[i]] == 0 {
-			hlog.SystemLogger().Warnf("Cookie.Value 包含无效字节 %q，"+
+			wlog.SystemLogger().Warnf("Cookie.Value 包含无效字节 %q，"+
 				"可能导致用户代理的兼容问题", value[i])
 			return false
 		}

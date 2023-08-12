@@ -8,7 +8,7 @@ import (
 
 	"github.com/cloudwego/netpoll"
 	errs "github.com/favbox/wind/common/errors"
-	"github.com/favbox/wind/common/hlog"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/network"
 )
 
@@ -93,7 +93,7 @@ func (c *Conn) HandleSpecificError(err error, remoteIP string) (needIgnore bool)
 		if strings.Contains(err.Error(), "when flush") {
 			return true
 		}
-		hlog.SystemLogger().Debugf("Netpoll error=%s, remoteAddr=%s", err.Error(), remoteIP)
+		wlog.SystemLogger().Debugf("Netpoll error=%s, remoteAddr=%s", err.Error(), remoteIP)
 		return true
 	}
 

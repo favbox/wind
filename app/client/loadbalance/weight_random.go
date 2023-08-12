@@ -5,7 +5,7 @@ import (
 
 	"github.com/bytedance/gopkg/lang/fastrand"
 	"github.com/favbox/wind/app/client/discovery"
-	"github.com/favbox/wind/common/hlog"
+	"github.com/favbox/wind/common/wlog"
 	"golang.org/x/sync/singleflight"
 )
 
@@ -75,7 +75,7 @@ func (wb *weightedBalancer) calcWeightInfo(e discovery.Result) *weightInfo {
 			w.weightSum += weight
 			cnt++
 		} else {
-			hlog.SystemLogger().Warnf("实例地址=%s 上的权重=%d 无效", e.Instances[idx].Address(), weight)
+			wlog.SystemLogger().Warnf("实例地址=%s 上的权重=%d 无效", e.Instances[idx].Address(), weight)
 		}
 	}
 	w.instances = w.instances[:cnt]

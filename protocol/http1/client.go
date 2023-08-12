@@ -16,8 +16,8 @@ import (
 	"github.com/favbox/wind/app/client/retry"
 	"github.com/favbox/wind/common/config"
 	errs "github.com/favbox/wind/common/errors"
-	"github.com/favbox/wind/common/hlog"
 	"github.com/favbox/wind/common/timer"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/internal/bytesconv"
 	"github.com/favbox/wind/internal/bytestr"
 	"github.com/favbox/wind/internal/nocopy"
@@ -280,7 +280,7 @@ func (c *HostClient) Do(ctx context.Context, req *protocol.Request, resp *protoc
 		// 若无自定义重试且 err == nil，则循环将直接退出。
 		if err == nil && isDefaultRetryFunc {
 			if connAttempts != 0 {
-				hlog.SystemLogger().Warnf("客户端连接尝试次数：%d，网址：%s。"+
+				wlog.SystemLogger().Warnf("客户端连接尝试次数：%d，网址：%s。"+
 					"这主要是因为对端提前关闭了池中的连接。"+
 					"若该数过高，则表明长连接基本已不可用，"+
 					"尝试把请求改为短链接。\n", connAttempts, req.URI().FullURI())
@@ -581,7 +581,7 @@ func dialAddr(addr string, dial network.Dialer, dialDualStack bool, tlsConfig *t
 	var conn network.Conn
 	var err error
 	if dial == nil {
-		hlog.SystemLogger().Warn("HostClient: 未指定拨号器，尝试使用默认拨号器")
+		wlog.SystemLogger().Warn("HostClient: 未指定拨号器，尝试使用默认拨号器")
 		dial = dialer.DefaultDialer()
 	}
 	dialFunc := dial.DialConnection

@@ -5,9 +5,9 @@ import (
 	"runtime/debug"
 
 	"github.com/favbox/wind/app"
-	"github.com/favbox/wind/common/hlog"
 	"github.com/favbox/wind/common/tracer"
 	"github.com/favbox/wind/common/tracer/stats"
+	"github.com/favbox/wind/common/wlog"
 )
 
 // Controller 用于控制跟踪器。
@@ -52,6 +52,6 @@ func (ctl *Controller) HasTracer() bool {
 
 func (ctl *Controller) tryRecover() {
 	if err := recover(); err != nil {
-		hlog.SystemLogger().Warnf("在调用跟踪器时出现恐慌。这不影响 http 调用，但可能丢失度量指标和日志等监控数据：%s, %s", err, string(debug.Stack()))
+		wlog.SystemLogger().Warnf("在调用跟踪器时出现恐慌。这不影响 http 调用，但可能丢失度量指标和日志等监控数据：%s, %s", err, string(debug.Stack()))
 	}
 }

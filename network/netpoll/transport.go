@@ -9,7 +9,7 @@ import (
 
 	"github.com/cloudwego/netpoll"
 	"github.com/favbox/wind/common/config"
-	"github.com/favbox/wind/common/hlog"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/network"
 )
 
@@ -82,7 +82,7 @@ func (t *transport) ListenAndServe(onReq network.OnData) (err error) {
 	}
 
 	// 启动服务器
-	hlog.SystemLogger().Infof("HTTP服务器监听地址=%s", t.listener.Addr().String())
+	wlog.SystemLogger().Infof("HTTP服务器监听地址=%s", t.listener.Addr().String())
 	t.RLock()
 	err = t.eventLoop.Serve(t.listener)
 	t.RUnlock()
