@@ -249,10 +249,12 @@ type SlowReadConn struct {
 func (m *SlowReadConn) SetWriteTimeout(t time.Duration) error {
 	return nil
 }
+
 func (m *SlowReadConn) SetReadTimeout(t time.Duration) error {
 	m.Conn.readTimeout = t
 	return nil
 }
+
 func (m *SlowReadConn) Peek(i int) ([]byte, error) {
 	b, err := m.zr.Peek(i)
 	if m.readTimeout > 0 {
@@ -333,7 +335,6 @@ func (m *StreamConn) Peek(n int) ([]byte, error) {
 		return m.Data[:n], nil
 	}
 	if n == 1 {
-
 	}
 	return nil, errs.NewPublic("数据不足")
 }

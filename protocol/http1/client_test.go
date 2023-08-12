@@ -128,7 +128,7 @@ func TestHostClient_MaxConnWaitTimeoutWithEarlierDeadline(t *testing.T) {
 	}
 }
 
-func newSlowConnDialer(dialer func(network string, addr string) (network.Conn, error)) network.Dialer {
+func newSlowConnDialer(dialer func(network, addr string) (network.Conn, error)) network.Dialer {
 	return &mockDialer{customDialConn: dialer}
 }
 

@@ -714,7 +714,6 @@ func (h *RequestHeader) SetMethodBytes(method []byte) {
 
 // SetMultipartFormBoundary 设置 MultipartFormData 后的边界值。
 func (h *RequestHeader) SetMultipartFormBoundary(boundary string) {
-
 	b := h.bufKV.value[:0]
 	b = append(b, bytestr.StrMultipartFormData...)
 	b = append(b, ';', ' ')

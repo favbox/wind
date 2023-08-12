@@ -323,8 +323,8 @@ func TestMustRegTypeUnmarshal(t *testing.T) {
 			return reflect.ValueOf(Nested{}), nil
 		}
 		val := Nested{
-			B: v[:5],
-			C: v[5:],
+			B: v[:4],
+			C: v[4:],
 		}
 		return reflect.ValueOf(val), nil
 	})

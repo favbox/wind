@@ -397,7 +397,7 @@ func ReleaseResponse(resp *Response) {
 }
 
 // SwapResponseBody 交换两个响应的主体。
-func SwapResponseBody(a *Response, b *Response) {
+func SwapResponseBody(a, b *Response) {
 	a.body, b.body = b.body, a.body
 	a.bodyRaw, b.bodyRaw = b.bodyRaw, a.bodyRaw
 	a.bodyStream, b.bodyStream = b.bodyStream, a.bodyStream

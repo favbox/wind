@@ -351,6 +351,7 @@ func TestRequestHeaderResetConnectionClose(t *testing.T) {
 		t.Fatalf("ResetConnectionClose do not work,Connection: %q", hv)
 	}
 }
+
 func TestCheckWriteHeaderCode(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
 	hlog.SetOutput(buffer)

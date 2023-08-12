@@ -48,22 +48,22 @@ func (m *mockConn) ConnectionState() tls.ConnectionState {
 }
 
 func (m *mockConn) Read(b []byte) (n int, err error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (m *mockConn) Write(b []byte) (n int, err error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (m *mockConn) Close() error {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (m *mockConn) LocalAddr() net.Addr {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
@@ -76,62 +76,62 @@ func (m *mockConn) RemoteAddr() net.Addr {
 }
 
 func (m *mockConn) SetDeadline(t time.Time) error {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (m *mockConn) SetReadDeadline(t time.Time) error {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (m *mockConn) SetWriteDeadline(t time.Time) error {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (m *mockConn) Len() int {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (m *mockConn) Peek(n int) ([]byte, error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (m *mockConn) Skip(n int) error {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (m *mockConn) ReadByte() (byte, error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (m *mockConn) ReadBinary(n int) (p []byte, err error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (m *mockConn) Release() error {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (m *mockConn) Malloc(n int) (buf []byte, err error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (m *mockConn) WriteBinary(b []byte) (n int, err error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (m *mockConn) Flush() error {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
@@ -140,7 +140,7 @@ func (m *mockConn) SetReadTimeout(t time.Duration) error {
 }
 
 func (m *mockConn) SetWriteTimeout(t time.Duration) error {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 

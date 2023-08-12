@@ -55,7 +55,7 @@ type clientURLResponse struct {
 
 // DefaultRetryIf 默认重试条件，主要用于幂等请求。
 func DefaultRetryIf(req *protocol.Request, resp *protocol.Response, err error) bool {
-	//如果请求正文不可回放，则无法重试
+	// 如果请求正文不可回放，则无法重试
 	if req.IsBodyStream() {
 		return false
 	}

@@ -181,6 +181,7 @@ func NewHostClient(c *ClientOptions) client.HostClient {
 	}
 	return hc
 }
+
 func (c *HostClient) Close() error {
 	close(c.closed)
 	return nil

@@ -93,6 +93,6 @@ func (b *ByteBuffer) Len() int {
 
 // 返回 ByteBuffer.B 的字符串表示形式。
 func (b *ByteBuffer) String() string {
-	//return bytesconv.B2s(b.B)
+	// return bytesconv.B2s(b.B)
 	return string(b.B)
 }

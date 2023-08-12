@@ -153,7 +153,7 @@ func (t *Trailer) AppendBytes(dst []byte) []byte {
 }
 
 // 添加指定键的值。
-func (t *Trailer) addArgBytes(key []byte, value []byte, noValue bool) error {
+func (t *Trailer) addArgBytes(key, value []byte, noValue bool) error {
 	if IsBadTrailer(key) {
 		return errs.NewPublicf("禁止使用的 Trailer 键: %q", key)
 	}

@@ -100,5 +100,4 @@ func TestPerformRequest(t *testing.T) {
 	resp = w.Result()
 	assert.Equal(t, consts.StatusAccepted, resp.StatusCode())
 	assert.Equal(t, "body:3\r\nhel\r\n4\r\nlo w\r\n5\r\norld!\r\n0\r\n\r\n", string(resp.Body()))
-
 }

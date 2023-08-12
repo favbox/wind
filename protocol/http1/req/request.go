@@ -155,7 +155,7 @@ func ReadHeaderAndLimitBody(req *protocol.Request, r network.Reader, maxBodySize
 	return ReadLimitBody(req, r, maxBodySize, false, parse)
 }
 
-func ReadLimitBody(req *protocol.Request, r network.Reader, maxBodySize int, getOnly bool, preParseMultipartForm bool) error {
+func ReadLimitBody(req *protocol.Request, r network.Reader, maxBodySize int, getOnly, preParseMultipartForm bool) error {
 	// 不要在此重置请求 - 调用方须在此前就重置它。
 	if getOnly && !req.Header.IsGet() {
 		return errGETOnly

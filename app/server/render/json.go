@@ -8,8 +8,10 @@ import (
 	"github.com/favbox/wind/protocol"
 )
 
-var jsonContentType = "application/json; charset=utf-8"
-var jsonMarshalFunc JSONMarshaler
+var (
+	jsonContentType = "application/json; charset=utf-8"
+	jsonMarshalFunc JSONMarshaler
+)
 
 // JSONMarshaler 自定义 json.Marshal。
 type JSONMarshaler func(v any) ([]byte, error)

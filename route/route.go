@@ -78,7 +78,7 @@ func (group *RouterGroup) Use(middleware ...app.HandlerFunc) Router {
 }
 
 // Handle 路由注册的通用函数，最后一个处理器为主函数，其余为中间件。 也可用于低频或非标的请求方法（如：与代理的内部通信等）。
-func (group *RouterGroup) Handle(httpMethod string, relativePath string, handlers ...app.HandlerFunc) Router {
+func (group *RouterGroup) Handle(httpMethod, relativePath string, handlers ...app.HandlerFunc) Router {
 	if matches := upperLetterReg.MatchString(httpMethod); !matches {
 		panic("http 请求方法 `" + httpMethod + "` 无效")
 	}
@@ -112,7 +112,6 @@ func (group *RouterGroup) POST(relativePath string, handlers ...app.HandlerFunc)
 // DELETE 注册一条 DELETE 路由， 是 Handle("DELETE", relativePath, handlers) 的快捷方式。
 func (group *RouterGroup) DELETE(relativePath string, handlers ...app.HandlerFunc) Router {
 	return group.handle(consts.MethodDelete, relativePath, handlers)
-
 }
 
 // PATCH 注册一条 PATCH 路由， 是 Handle("PATCH", relativePath, handlers) 的快捷方式。
@@ -136,7 +135,7 @@ func (group *RouterGroup) HEAD(relativePath string, handlers ...app.HandlerFunc)
 }
 
 // StaticFile 单文件服务。用法：StaticFile("favicon.ico", "./resources/favicon.ico")
-func (group *RouterGroup) StaticFile(relativePath string, filepath string) Router {
+func (group *RouterGroup) StaticFile(relativePath, filepath string) Router {
 	if strings.Contains(relativePath, ":") || strings.Contains(relativePath, "*") {
 		panic("提供静态文件服务时不能使用 URL 参数，如':*'")
 	}
@@ -149,7 +148,7 @@ func (group *RouterGroup) StaticFile(relativePath string, filepath string) Route
 }
 
 // Static 文件夹服务。用法：router.Static("/static", "/var/www")
-func (group *RouterGroup) Static(relativePath string, root string) Router {
+func (group *RouterGroup) Static(relativePath, root string) Router {
 	return group.StaticFS(relativePath, &app.FS{Root: root})
 }
 

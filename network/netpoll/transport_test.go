@@ -39,7 +39,7 @@ func TestTransport(t *testing.T) {
 			WriteTimeout: time.Second,
 		})
 		go transporter.ListenAndServe(func(ctx context.Context, conn any) error {
-			//fmt.Println("数据已准备")
+			// fmt.Println("数据已准备")
 			atomic.StoreInt32(&onDataFlag, 1)
 			return nil
 		})

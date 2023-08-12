@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"context"
 	"fmt"
+	"html"
 	"io"
 	"mime"
 	"net/http"
@@ -26,7 +27,6 @@ import (
 	"github.com/favbox/wind/network"
 	"github.com/favbox/wind/protocol"
 	"github.com/favbox/wind/protocol/consts"
-	"golang.org/x/net/html"
 )
 
 var (

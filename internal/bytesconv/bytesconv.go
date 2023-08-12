@@ -105,7 +105,7 @@ func AppendHTTPDate(dst []byte, date time.Time) []byte {
 }
 
 // ParseUintBuf 解析 b 中的整数。
-func ParseUintBuf(b []byte) (v int, n int, err error) {
+func ParseUintBuf(b []byte) (v, n int, err error) {
 	n = len(b)
 	if n == 0 {
 		return -1, 0, errEmptyInt

@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/favbox/wind/app"
+	c "github.com/favbox/wind/app/client"
 	"github.com/favbox/wind/app/server/registry"
 	"github.com/favbox/wind/common/config"
 	errs "github.com/favbox/wind/common/errors"
@@ -143,21 +144,21 @@ func TestLoadHTMLGlob(t *testing.T) {
 }
 
 func TestLoadHTMLFiles(t *testing.T) {
-	wind := New(WithMaxRequestBodySize(15), WithHostPorts("127.0.0.1:8888"))
+	wind := New(WithMaxRequestBodySize(15), WithHostPorts("127.0.0.1:8891"))
 	wind.Delims("{[{", "}]}")
 	wind.SetFuncMap(template.FuncMap{
 		"formatAsDate": formatAsDate,
 	})
-	wind.LoadHTMLFiles("../../common/testdata/template/htmltemplate.html", "../../common/testdata/template/index.tmpl")
+	wind.LoadHTMLFiles("../../common/testdata/template/html_template.html", "../../common/testdata/template/index.tmpl")
 	wind.GET("/raw", func(c context.Context, ctx *app.RequestContext) {
-		ctx.HTML(consts.StatusOK, "htmltemplate.html", utils.H{
+		ctx.HTML(consts.StatusOK, "html_template.html", utils.H{
 			"now": time.Date(2017, 7, 1, 0, 0, 0, 0, time.UTC),
 		})
 	})
 
 	go wind.Run()
 	time.Sleep(200 * time.Millisecond)
-	resp, _ := http.Get("http://localhost:8888/raw")
+	resp, _ := http.Get("http://localhost:8891/raw")
 	assert.Equal(t, consts.StatusOK, resp.StatusCode)
 	b := make([]byte, 100)
 	n, _ := resp.Body.Read(b)
@@ -186,28 +187,28 @@ func TestWind_Engine_GetServerName(t *testing.T) {
 }
 
 func TestServer_Run(t *testing.T) {
-	wind := New(WithHostPorts("localhost:8888"))
+	wind := New(WithHostPorts("127.0.0.1:18888"))
 	wind.GET("/test", func(c context.Context, ctx *app.RequestContext) {
 		path := ctx.Request.URI().PathOriginal()
 		ctx.SetBodyString(string(path))
 	})
 	wind.POST("/redirect", func(c context.Context, ctx *app.RequestContext) {
-		ctx.Redirect(consts.StatusMovedPermanently, []byte("http://localhost:8888/test"))
+		ctx.Redirect(consts.StatusMovedPermanently, []byte("http://localhost:18888/test"))
 	})
 	go wind.Run()
 	time.Sleep(100 * time.Millisecond)
-	resp, err := http.Get("http://localhost:8888/test")
+	resp, err := http.Get("http://127.0.0.1:18888/test")
 	assert.Nil(t, err)
 	assert.Equal(t, consts.StatusOK, resp.StatusCode)
 	b := make([]byte, 5)
 	resp.Body.Read(b)
 	assert.Equal(t, "/test", string(b))
 
-	resp, err = http.Get("http://localhost:8888/foo")
+	resp, err = http.Get("http://127.0.0.1:18888/foo")
 	assert.Nil(t, err)
 	assert.Equal(t, consts.StatusNotFound, resp.StatusCode)
 
-	resp, err = http.Post("http://127.0.0.1:8888/redirect", "", nil)
+	resp, err = http.Post("http://127.0.0.1:18888/redirect", "", nil)
 	assert.Nil(t, err)
 	assert.Equal(t, consts.StatusOK, resp.StatusCode)
 	b = make([]byte, 5)
@@ -220,7 +221,7 @@ func TestServer_Run(t *testing.T) {
 }
 
 func TestNotAbsolutePath(t *testing.T) {
-	wind := New(WithHostPorts("127.0.0.1:8888"))
+	wind := New(WithHostPorts("127.0.0.1:9990"))
 	wind.POST("/", func(c context.Context, ctx *app.RequestContext) {
 		ctx.Write(ctx.Request.Body())
 	})
@@ -433,108 +434,82 @@ func verifyResponseHeader(t *testing.T, h *protocol.ResponseHeader, expectedStat
 	}
 }
 
-// TODO 参数不一致
-//func TestParamInconsist(t *testing.T) {
-//	mapS := sync.Map{}
-//	h := New(WithHostPorts("localhost:10091"))
-//	h.GET("/:label", func(c context.Context, ctx *app.RequestContext) {
-//		label := ctx.Param("label")
-//		x, _ := mapS.LoadOrStore(label, label)
-//		labelString := x.(string)
-//		if label != labelString {
-//			t.Errorf("unexpected label: %s, expected return label: %s", label, labelString)
-//		}
-//	})
-//	go h.Run()
-//	time.Sleep(time.Millisecond * 50)
-//	client, _ := c.NewClient()
-//	wg := sync.WaitGroup{}
-//	tr := func() {
-//		defer wg.Done()
-//		for i := 0; i < 5000; i++ {
-//			client.Get(context.Background(), nil, "http://localhost:10091/test1")
-//		}
-//	}
-//	ti := func() {
-//		defer wg.Done()
-//		for i := 0; i < 5000; i++ {
-//			client.Get(context.Background(), nil, "http://localhost:10091/test2")
-//		}
-//	}
-//
-//	for i := 0; i < 30; i++ {
-//		go tr()
-//		go ti()
-//		wg.Add(2)
-//	}
-//	wg.Wait()
-//}
-
-//func TestDuplicateReleaseBodyStream(t *testing.T) {
-//	h := New(WithStreamBody(true), WithHostPorts("localhost:10092"))
-//	h.POST("/test", func(ctx context.Context, c *app.RequestContext) {
-//		stream := c.RequestBodyStream()
-//		c.Response.SetBodyStream(stream, -1)
-//	})
-//	go h.Spin()
-//	time.Sleep(time.Second)
-//	client, _ := c.NewClient(c.WithMaxConnsPerHost(1000000), c.WithDialTimeout(time.Minute))
-//	bodyBytes := make([]byte, 102388)
-//	index := 0
-//	letterBytes := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-//	for i := 0; i < 102388; i++ {
-//		bodyBytes[i] = letterBytes[index]
-//		if i%1969 == 0 && i != 0 {
-//			index = index + 1
-//		}
-//	}
-//	body := string(bodyBytes)
-//
-//	wg := sync.WaitGroup{}
-//	testFunc := func() {
-//		defer wg.Done()
-//		r := protocol.NewRequest("POST", "http://localhost:10092/test", nil)
-//		r.SetBodyString(body)
-//		resp := protocol.AcquireResponse()
-//		err := client.Do(context.Background(), r, resp)
-//		if err != nil {
-//			t.Errorf("unexpected error: %s", err.Error())
-//		}
-//		if body != string(resp.Body()) {
-//			t.Errorf("unequal body")
-//		}
-//	}
-//
-//	for i := 0; i < 10; i++ {
-//		wg.Add(1)
-//		go testFunc()
-//	}
-//	wg.Wait()
-//}
-
-func TestSrv(t *testing.T) {
-	wind := New()
-	wind.Any("/", func(c context.Context, ctx *app.RequestContext) {
-		ctx.String(consts.StatusOK, "hello %s!", ctx.DefaultQuery("name", "world"))
+func TestParamInconsist(t *testing.T) {
+	mapS := sync.Map{}
+	h := New(WithHostPorts("localhost:10091"))
+	h.GET("/:label", func(c context.Context, ctx *app.RequestContext) {
+		label := ctx.Param("label")
+		x, _ := mapS.LoadOrStore(label, label)
+		labelString := x.(string)
+		if label != labelString {
+			t.Errorf("unexpected label: %s, expected return label: %s", label, labelString)
+		}
 	})
-	wind.StaticFS("/static", &app.FS{
-		Root:                 "/Users/zs/Downloads",
-		IndexNames:           nil,
-		GenerateIndexPages:   true,
-		Compress:             true,
-		CompressedFileSuffix: "",
-		CacheDuration:        0,
-		AcceptByteRange:      false,
-		PathRewrite:          nil,
-		PathNotFound:         nil,
-	})
+	go h.Run()
+	time.Sleep(time.Millisecond * 50)
+	client, _ := c.NewClient()
+	wg := sync.WaitGroup{}
+	tr := func() {
+		defer wg.Done()
+		for i := 0; i < 5000; i++ {
+			client.Get(context.Background(), nil, "http://localhost:10091/test1")
+		}
+	}
+	ti := func() {
+		defer wg.Done()
+		for i := 0; i < 5000; i++ {
+			client.Get(context.Background(), nil, "http://localhost:10091/test2")
+		}
+	}
 
-	//err := wind.Run()
-	//if err != nil {
-	//	t.Fatal(err)
-	//}
-	go wind.Spin()
-	select {}
+	for i := 0; i < 30; i++ {
+		go tr()
+		go ti()
+		wg.Add(2)
+	}
+	wg.Wait()
+}
+
+func TestDuplicateReleaseBodyStream(t *testing.T) {
+	h := New(WithStreamBody(true), WithHostPorts("localhost:10092"))
+	h.POST("/test", func(ctx context.Context, c *app.RequestContext) {
+		stream := c.RequestBodyStream()
+		c.Response.SetBodyStream(stream, -1)
+	})
+	go h.Spin()
+	time.Sleep(time.Second)
+	client, _ := c.NewClient(c.WithMaxConnsPerHost(1000000), c.WithDialTimeout(time.Minute))
+	bodyBytes := make([]byte, 102388)
+	index := 0
+	letterBytes := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	for i := 0; i < 102388; i++ {
+		bodyBytes[i] = letterBytes[index]
+		if i%1969 == 0 && i != 0 {
+			index = index + 1
+		}
+	}
+	body := string(bodyBytes)
+
+	wg := sync.WaitGroup{}
+	testFunc := func() {
+		defer wg.Done()
+		r := protocol.NewRequest("POST", "http://localhost:10092/test", nil)
+		r.SetBodyString(body)
+		resp := protocol.AcquireResponse()
+		err := client.Do(context.Background(), r, resp)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+		}
+		if body != string(resp.Body()) {
+			t.Errorf("unequal body")
+		}
+	}
+
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go testFunc()
+	}
+	wg.Wait()
 }
 
 func TestServiceRegisterFailed(t *testing.T) {

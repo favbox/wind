@@ -161,7 +161,7 @@ func (c *Config) Delete(protocol string) {
 	delete(c.configMap, protocol)
 }
 
-func (c *Config) SetAltHeader(targetProtocol string, altHeader string) {
+func (c *Config) SetAltHeader(targetProtocol, altHeader string) {
 	c.altServerConfig = &altServerConfig{
 		targetProtocol: targetProtocol,
 		setAltHeaderFunc: func(ctx context.Context, reqCtx *app.RequestContext) {

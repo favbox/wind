@@ -47,7 +47,7 @@ func TestGcBodyStream(t *testing.T) {
 		}
 	}
 
-	//time.Sleep(time.Minute)
+	// time.Sleep(time.Minute)
 
 	runtime.GC()
 	// 等待 gc
