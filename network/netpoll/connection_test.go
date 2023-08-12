@@ -1,0 +1,202 @@
+package netpoll
+
+import (
+	"errors"
+	"net"
+	"testing"
+	"time"
+
+	"github.com/cloudwego/netpoll"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestReadBytes(t *testing.T) {
+	c := &mockConn{[]byte("a"), nil, 0}
+	conn := newConn(c)
+	assert.Equal(t, 1, conn.Len())
+
+	b, _ := conn.Peek(1)
+	assert.Equal(t, []byte{'a'}, b)
+
+	readByte, _ := conn.ReadByte()
+	assert.Equal(t, byte('a'), readByte)
+
+	_, err := conn.ReadByte()
+	assert.Equal(t, errors.New("readByte error: index out of range"), err)
+
+	c = &mockConn{[]byte("bcd"), nil, 0}
+	conn = newConn(c)
+
+	readBinary, _ := conn.ReadBinary(2)
+	assert.Equal(t, []byte{'b', 'c'}, readBinary)
+
+	_, err = conn.ReadBinary(2)
+	assert.Equal(t, errors.New("readBinary error: index out of range"), err)
+}
+
+func TestPeekRelease(t *testing.T) {
+	c := &mockConn{[]byte("abcdefg"), nil, 0}
+	conn := newConn(c)
+
+	// release the buf
+	conn.Release()
+	_, err := conn.Peek(1)
+	assert.Equal(t, errors.New("peek error"), err)
+
+	assert.Equal(t, errors.New("skip error"), conn.Skip(2))
+}
+
+func TestWriteLogin(t *testing.T) {
+	c := &mockConn{nil, []byte("abcdefg"), 0}
+	conn := newConn(c)
+	buf, _ := conn.Malloc(10)
+	assert.Equal(t, 10, len(buf))
+	n, _ := conn.WriteBinary([]byte("abcdefg"))
+	assert.Equal(t, 7, n)
+	assert.Equal(t, errors.New("flush error"), conn.Flush())
+}
+
+func TestHandleSpecificError(t *testing.T) {
+	conn := &Conn{}
+	assert.Equal(t, false, conn.HandleSpecificError(nil, ""))
+	assert.Equal(t, true, conn.HandleSpecificError(netpoll.ErrConnClosed, ""))
+}
+
+type mockConn struct {
+	readBuf  []byte
+	writeBuf []byte
+	// readBuf 中第一个可读字节的索引
+	off int
+}
+
+func (m *mockConn) SetWriteTimeout(timeout time.Duration) error {
+	panic("implement me")
+}
+
+// mockConn's methods is simplified for unit test
+// Peek returns the next n bytes without advancing the reader
+func (m *mockConn) Peek(n int) (b []byte, err error) {
+	if m.off+n-1 < len(m.readBuf) {
+		return m.readBuf[m.off : m.off+n], nil
+	}
+	return nil, errors.New("peek error")
+}
+
+// Skip discards the next n bytes
+func (m *mockConn) Skip(n int) error {
+	if m.off+n < len(m.readBuf) {
+		m.off += n
+		return nil
+	}
+	return errors.New("skip error")
+}
+
+// Release the memory space occupied by all read slices
+func (m *mockConn) Release() error {
+	m.readBuf = nil
+	m.off = 0
+	return nil
+}
+
+// Len returns the total length of the readable data in the reader
+func (m *mockConn) Len() int {
+	return len(m.readBuf) - m.off
+}
+
+// ReadByte is used to read one byte with advancing the read pointer
+func (m *mockConn) ReadByte() (byte, error) {
+	if m.off < len(m.readBuf) {
+		m.off++
+		return m.readBuf[m.off-1], nil
+	}
+	return 0, errors.New("readByte error: index out of range")
+}
+
+// ReadBinary is used to read next n byte with copy, and the read pointer will be advanced
+func (m *mockConn) ReadBinary(n int) (b []byte, err error) {
+	if m.off+n < len(m.readBuf) {
+		m.off += n
+		return m.readBuf[m.off-n : m.off], nil
+	}
+	return nil, errors.New("readBinary error: index out of range")
+}
+
+// Malloc will provide a n bytes buffer to send data
+func (m *mockConn) Malloc(n int) (buf []byte, err error) {
+	m.writeBuf = make([]byte, n)
+	return m.writeBuf, nil
+}
+
+// WriteBinary will use the user buffer to flush
+func (m *mockConn) WriteBinary(b []byte) (n int, err error) {
+	return len(b), nil
+}
+
+// Flush will send data to the peer end
+func (m *mockConn) Flush() error {
+	return errors.New("flush error")
+}
+
+func (m *mockConn) HandleSpecificError(err error, rip string) (needIgnore bool) {
+	panic("implement me")
+}
+
+func (m *mockConn) Read(b []byte) (n int, err error) {
+	panic("implement me")
+}
+
+func (m *mockConn) Write(b []byte) (n int, err error) {
+	panic("implement me")
+}
+
+func (m *mockConn) Close() error {
+	panic("implement me")
+}
+
+func (m *mockConn) LocalAddr() net.Addr {
+	panic("implement me")
+}
+
+func (m *mockConn) RemoteAddr() net.Addr {
+	panic("implement me")
+}
+
+func (m *mockConn) SetDeadline(deadline time.Time) error {
+	panic("implement me")
+}
+
+func (m *mockConn) SetReadDeadline(deadline time.Time) error {
+	panic("implement me")
+}
+
+func (m *mockConn) SetWriteDeadline(deadline time.Time) error {
+	panic("implement me")
+}
+
+func (m *mockConn) Reader() netpoll.Reader {
+	panic("implement me")
+}
+
+func (m *mockConn) Writer() netpoll.Writer {
+	panic("implement me")
+}
+
+func (m *mockConn) IsActive() bool {
+	panic("implement me")
+}
+
+func (m *mockConn) SetReadTimeout(timeout time.Duration) error {
+	panic("implement me")
+}
+
+func (m *mockConn) SetIdleTimeout(timeout time.Duration) error {
+	panic("implement me")
+}
+
+func (m *mockConn) SetOnRequest(on netpoll.OnRequest) error {
+	panic("implement me")
+}
+
+func (m *mockConn) AddCloseCallback(callback netpoll.CloseCallback) error {
+	panic("implement me")
+}
