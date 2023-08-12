@@ -400,57 +400,57 @@ func TestEngine_Routes(t *testing.T) {
 	assertRoutePresent(t, list, Route{
 		Method:  "GET",
 		Path:    "/",
-		Handler: "github.com/favbox/gosky/wind/pkg/route.handlerTest1",
+		Handler: "github.com/favbox/wind/route.handlerTest1",
 	})
 	assertRoutePresent(t, list, Route{
 		Method:  "GET",
 		Path:    "/user",
-		Handler: "github.com/favbox/gosky/wind/pkg/route.handlerTest2",
+		Handler: "github.com/favbox/wind/route.handlerTest2",
 	})
 	assertRoutePresent(t, list, Route{
 		Method:  "GET",
 		Path:    "/user/:name/*action",
-		Handler: "github.com/favbox/gosky/wind/pkg/route.handlerTest1",
+		Handler: "github.com/favbox/wind/route.handlerTest1",
 	})
 	assertRoutePresent(t, list, Route{
 		Method:  "GET",
 		Path:    "/v1/user",
-		Handler: "github.com/favbox/gosky/wind/pkg/route.handlerTest1",
+		Handler: "github.com/favbox/wind/route.handlerTest1",
 	})
 	assertRoutePresent(t, list, Route{
 		Method:  "GET",
 		Path:    "/static/*filepath",
-		Handler: "github.com/favbox/gosky/wind/pkg/app.(*fsHandler).handleRequest-fm",
+		Handler: "github.com/favbox/wind/app.(*fsHandler).handleRequest-fm",
 	})
 	assertRoutePresent(t, list, Route{
 		Method:  "GET",
 		Path:    "/anonymous1",
-		Handler: "github.com/favbox/gosky/wind/pkg/route.TestEngine_Routes.func1",
+		Handler: "github.com/favbox/wind/route.TestEngine_Routes.func1",
 	})
 	assertRoutePresent(t, list, Route{
 		Method:  "POST",
 		Path:    "/user",
-		Handler: "github.com/favbox/gosky/wind/pkg/route.handlerTest2",
+		Handler: "github.com/favbox/wind/route.handlerTest2",
 	})
 	assertRoutePresent(t, list, Route{
 		Method:  "POST",
 		Path:    "/user/:name/*action",
-		Handler: "github.com/favbox/gosky/wind/pkg/route.handlerTest2",
+		Handler: "github.com/favbox/wind/route.handlerTest2",
 	})
 	assertRoutePresent(t, list, Route{
 		Method:  "POST",
 		Path:    "/anonymous2",
-		Handler: "github.com/favbox/gosky/wind/pkg/route.TestEngine_Routes.func2",
+		Handler: "github.com/favbox/wind/route.TestEngine_Routes.func2",
 	})
 	assertRoutePresent(t, list, Route{
 		Method:  "POST",
 		Path:    "/v1/login",
-		Handler: "github.com/favbox/gosky/wind/pkg/route.handlerTest2",
+		Handler: "github.com/favbox/wind/route.handlerTest2",
 	})
 	assertRoutePresent(t, list, Route{
 		Method:  "HEAD",
 		Path:    "/static/*filepath",
-		Handler: "github.com/favbox/gosky/wind/pkg/app.(*fsHandler).handleRequest-fm",
+		Handler: "github.com/favbox/wind/app.(*fsHandler).handleRequest-fm",
 	})
 }
 

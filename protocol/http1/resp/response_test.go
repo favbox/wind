@@ -10,13 +10,13 @@ import (
 	"testing"
 
 	"github.com/cloudwego/netpoll"
-	errs "github.com/favbox/gosky/wind/pkg/common/errors"
-	"github.com/favbox/gosky/wind/pkg/common/test/assert"
-	"github.com/favbox/gosky/wind/pkg/common/test/mock"
-	"github.com/favbox/gosky/wind/pkg/common/utils"
-	"github.com/favbox/gosky/wind/pkg/protocol"
-	"github.com/favbox/gosky/wind/pkg/protocol/consts"
-	"github.com/favbox/gosky/wind/pkg/protocol/http1/ext"
+	errs "github.com/favbox/wind/common/errors"
+	"github.com/favbox/wind/common/mock"
+	"github.com/favbox/wind/common/utils"
+	"github.com/favbox/wind/protocol"
+	"github.com/favbox/wind/protocol/consts"
+	"github.com/favbox/wind/protocol/http1/ext"
+	"github.com/stretchr/testify/assert"
 )
 
 var errBodyTooLarge = errs.New(errs.ErrBodyTooLarge, errs.ErrorTypePublic, "test")

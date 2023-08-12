@@ -1,6 +1,6 @@
 package render
 
-import "github.com/favbox/gosky/wind/pkg/protocol"
+import "github.com/favbox/wind/protocol"
 
 // Render 渲染接口将通过 JSON, HTML, XML 等实现。
 type Render interface {

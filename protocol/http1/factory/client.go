@@ -1,9 +1,9 @@
 package factory
 
 import (
-	"github.com/favbox/gosky/wind/pkg/protocol/client"
-	"github.com/favbox/gosky/wind/pkg/protocol/http1"
-	"github.com/favbox/gosky/wind/pkg/protocol/suite"
+	"github.com/favbox/wind/protocol/client"
+	"github.com/favbox/wind/protocol/http1"
+	"github.com/favbox/wind/protocol/suite"
 )
 
 var _ suite.ClientFactory = (*clientFactory)(nil)

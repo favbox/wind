@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/favbox/gosky/wind/pkg/common/tracer/stats"
+	"github.com/favbox/wind/common/tracer/stats"
 )
 
 var eventPool sync.Pool

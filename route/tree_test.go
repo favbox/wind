@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/favbox/gosky/wind/pkg/app"
-	"github.com/favbox/gosky/wind/pkg/route/param"
+	"github.com/favbox/wind/app"
+	"github.com/favbox/wind/route/param"
 )
 
 var fakeHandlerValue string

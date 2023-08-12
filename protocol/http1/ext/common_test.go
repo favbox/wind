@@ -8,19 +8,19 @@ import (
 	"testing"
 
 	"github.com/cloudwego/netpoll"
-	errs "github.com/favbox/gosky/wind/pkg/common/errors"
-	"github.com/favbox/gosky/wind/pkg/common/test/assert"
-	"github.com/favbox/gosky/wind/pkg/common/test/mock"
-	"github.com/favbox/gosky/wind/pkg/protocol"
+	errs "github.com/favbox/wind/common/errors"
+	"github.com/favbox/wind/common/mock"
+	"github.com/favbox/wind/protocol"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_stripSpace(t *testing.T) {
 	a := stripSpace([]byte("     a"))
 	b := stripSpace([]byte("b       "))
 	c := stripSpace([]byte("    c     "))
-	assert.DeepEqual(t, []byte("a"), a)
-	assert.DeepEqual(t, []byte("b"), b)
-	assert.DeepEqual(t, []byte("c"), c)
+	assert.Equal(t, []byte("a"), a)
+	assert.Equal(t, []byte("b"), b)
+	assert.Equal(t, []byte("c"), c)
 }
 
 func Test_bufferSnippet(t *testing.T) {
@@ -70,7 +70,7 @@ func TestReadTrailerError(t *testing.T) {
 	er := mock.EOFReader{}
 	trailer = protocol.Trailer{}
 	err = ReadTrailer(&trailer, &er)
-	assert.DeepEqual(t, io.EOF, err)
+	assert.Equal(t, io.EOF, err)
 }
 
 func TestReadTrailer1(t *testing.T) {
@@ -103,7 +103,7 @@ func TestReadRawHeaders(t *testing.T) {
 	var dst []byte
 	rawHeaders, index, err := ReadRawHeaders(dst, []byte(s))
 	assert.Nil(t, err)
-	assert.DeepEqual(t, s[:index], string(rawHeaders))
+	assert.Equal(t, s[:index], string(rawHeaders))
 }
 
 func TestBodyChunked(t *testing.T) {
@@ -115,12 +115,12 @@ func TestBodyChunked(t *testing.T) {
 	zw := netpoll.NewWriter(&w)
 	WriteBodyChunked(zw, b)
 
-	assert.DeepEqual(t, chunk, w.String())
+	assert.Equal(t, chunk, w.String())
 
 	zr := mock.NewZeroCopyReader(chunk)
 	rb, err := ReadBody(zr, -1, 0, nil)
 	assert.Nil(t, err)
-	assert.DeepEqual(t, body, string(rb))
+	assert.Equal(t, body, string(rb))
 }
 
 func TestBodyFixedSize(t *testing.T) {
@@ -131,12 +131,12 @@ func TestBodyFixedSize(t *testing.T) {
 	zw := netpoll.NewWriter(&w)
 	WriteBodyFixedSize(zw, b, int64(len(body)))
 
-	assert.DeepEqual(t, body, w.Bytes())
+	assert.Equal(t, body, w.Bytes())
 
 	zr := mock.NewZeroCopyReader(string(body))
 	rb, err := ReadBody(zr, len(body), 0, nil)
 	assert.Nil(t, err)
-	assert.DeepEqual(t, body, rb)
+	assert.Equal(t, body, rb)
 }
 
 func TestBodyFixedSizeQuickPath(t *testing.T) {
@@ -150,7 +150,7 @@ func TestBodyIdentity(t *testing.T) {
 	zr := mock.NewZeroCopyReader(string(body))
 	rb, err := ReadBody(zr, -2, 0, nil)
 	assert.Nil(t, err)
-	assert.DeepEqual(t, string(body), string(rb))
+	assert.Equal(t, string(body), string(rb))
 }
 
 func TestBodySkipTrailer(t *testing.T) {

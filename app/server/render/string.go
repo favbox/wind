@@ -3,7 +3,7 @@ package render
 import (
 	"fmt"
 
-	"github.com/favbox/gosky/wind/pkg/protocol"
+	"github.com/favbox/wind/protocol"
 )
 
 var plainContentType = "text/plain; charset=utf-8"

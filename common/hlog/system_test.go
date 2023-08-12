@@ -30,12 +30,12 @@ func TestSystemLogger(t *testing.T) {
 	sysLogger.Warn("工作可能失败")
 	sysLogger.Error("工作失败")
 
-	assert.Equal(t, "[Trace] wind: 跟踪工作\n"+
-		"[Debug] wind: 收到工作清单\n"+
-		"[Info] wind: 开始工作\n"+
-		"[Notice] wind: 工作中出现一些状况\n"+
-		"[Warn] wind: 工作可能失败\n"+
-		"[Error] wind: 工作失败\n", string(w.b))
+	assert.Equal(t, "[Trace] WIND: 跟踪工作\n"+
+		"[Debug] WIND: 收到工作清单\n"+
+		"[Info] WIND: 开始工作\n"+
+		"[Notice] WIND: 工作中出现一些状况\n"+
+		"[Warn] WIND: 工作可能失败\n"+
+		"[Error] WIND: 工作失败\n", string(w.b))
 }
 
 func TestSystemFormatLogger(t *testing.T) {
@@ -52,10 +52,10 @@ func TestSystemFormatLogger(t *testing.T) {
 	sysLogger.Warnf("%s可能失败", item)
 	sysLogger.Errorf("%s失败", item)
 
-	assert.Equal(t, "[Trace] wind: 跟踪工作\n"+
-		"[Debug] wind: 收到工作清单\n"+
-		"[Info] wind: 开始工作\n"+
-		"[Notice] wind: 工作中出现一些状况\n"+
-		"[Warn] wind: 工作可能失败\n"+
-		"[Error] wind: 工作失败\n", string(w.b))
+	assert.Equal(t, "[Trace] WIND: 跟踪工作\n"+
+		"[Debug] WIND: 收到工作清单\n"+
+		"[Info] WIND: 开始工作\n"+
+		"[Notice] WIND: 工作中出现一些状况\n"+
+		"[Warn] WIND: 工作可能失败\n"+
+		"[Error] WIND: 工作失败\n", string(w.b))
 }

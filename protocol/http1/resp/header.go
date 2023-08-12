@@ -7,14 +7,14 @@ import (
 	"io"
 	"strings"
 
-	"github.com/favbox/gosky/wind/internal/bytesconv"
-	"github.com/favbox/gosky/wind/internal/bytestr"
-	errs "github.com/favbox/gosky/wind/pkg/common/errors"
-	"github.com/favbox/gosky/wind/pkg/common/utils"
-	"github.com/favbox/gosky/wind/pkg/network"
-	"github.com/favbox/gosky/wind/pkg/protocol"
-	"github.com/favbox/gosky/wind/pkg/protocol/consts"
-	"github.com/favbox/gosky/wind/pkg/protocol/http1/ext"
+	errs "github.com/favbox/wind/common/errors"
+	"github.com/favbox/wind/common/utils"
+	"github.com/favbox/wind/internal/bytesconv"
+	"github.com/favbox/wind/internal/bytestr"
+	"github.com/favbox/wind/network"
+	"github.com/favbox/wind/protocol"
+	"github.com/favbox/wind/protocol/consts"
+	"github.com/favbox/wind/protocol/http1/ext"
 )
 
 var errTimeout = errs.New(errs.ErrTimeout, errs.ErrorTypePublic, "读取响应头")

@@ -6,8 +6,8 @@ import (
 	"net/url"
 
 	"github.com/bytedance/go-tagexpr/v2/binding"
-	"github.com/favbox/gosky/wind/internal/bytesconv"
-	"github.com/favbox/gosky/wind/pkg/protocol"
+	"github.com/favbox/wind/internal/bytesconv"
+	"github.com/favbox/wind/protocol"
 )
 
 func wrapRequest(req *protocol.Request) binding.Request {

@@ -3,7 +3,7 @@ package render
 import (
 	"encoding/xml"
 
-	"github.com/favbox/gosky/wind/pkg/protocol"
+	"github.com/favbox/wind/protocol"
 )
 
 var xmlContentType = "application/xml; charset=utf-8"

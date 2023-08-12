@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/favbox/gosky/wind/pkg/common/hlog"
-	"github.com/favbox/gosky/wind/pkg/protocol"
+	"github.com/favbox/wind/common/hlog"
+	"github.com/favbox/wind/protocol"
 	"github.com/fsnotify/fsnotify"
 )
 

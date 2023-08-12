@@ -1,7 +1,7 @@
 package render
 
 import (
-	"github.com/favbox/gosky/wind/pkg/protocol"
+	"github.com/favbox/wind/protocol"
 	"google.golang.org/protobuf/proto"
 )
 

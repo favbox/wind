@@ -3,9 +3,9 @@ package resp
 import (
 	"testing"
 
-	"github.com/favbox/gosky/wind/internal/bytestr"
-	"github.com/favbox/gosky/wind/pkg/common/test/mock"
-	"github.com/favbox/gosky/wind/pkg/protocol"
+	"github.com/favbox/wind/common/mock"
+	"github.com/favbox/wind/internal/bytestr"
+	"github.com/favbox/wind/protocol"
 	"github.com/stretchr/testify/assert"
 )
 

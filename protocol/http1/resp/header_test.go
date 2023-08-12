@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/cloudwego/netpoll"
-	"github.com/favbox/gosky/wind/pkg/protocol"
+	"github.com/favbox/wind/protocol"
 )
 
 func TestResponseHeaderCookie(t *testing.T) {

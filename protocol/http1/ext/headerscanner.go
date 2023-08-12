@@ -3,8 +3,8 @@ package ext
 import (
 	"bytes"
 
-	errs "github.com/favbox/gosky/wind/pkg/common/errors"
-	"github.com/favbox/gosky/wind/pkg/common/utils"
+	errs "github.com/favbox/wind/common/errors"
+	"github.com/favbox/wind/common/utils"
 )
 
 var errInvalidName = errs.NewPublic("无效的标头名称")

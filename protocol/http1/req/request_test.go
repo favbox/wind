@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/favbox/gosky/wind/pkg/common/test/mock"
-	"github.com/favbox/gosky/wind/pkg/protocol"
-	"github.com/favbox/gosky/wind/pkg/protocol/consts"
+	"github.com/favbox/wind/common/mock"
+	"github.com/favbox/wind/protocol"
+	"github.com/favbox/wind/protocol/consts"
 )
 
 func TestRequestContinueReadBody(t *testing.T) {

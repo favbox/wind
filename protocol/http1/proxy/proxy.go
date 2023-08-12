@@ -7,17 +7,17 @@ import (
 	"encoding/base64"
 	"time"
 
-	"github.com/favbox/gosky/wind/internal/bytesconv"
-	"github.com/favbox/gosky/wind/internal/bytestr"
-	"github.com/favbox/gosky/wind/pkg/common/errors"
-	"github.com/favbox/gosky/wind/pkg/network"
-	"github.com/favbox/gosky/wind/pkg/protocol"
-	"github.com/favbox/gosky/wind/pkg/protocol/consts"
-	reqI "github.com/favbox/gosky/wind/pkg/protocol/http1/req"
-	respI "github.com/favbox/gosky/wind/pkg/protocol/http1/resp"
+	"github.com/favbox/wind/common/errors"
+	"github.com/favbox/wind/internal/bytesconv"
+	"github.com/favbox/wind/internal/bytestr"
+	"github.com/favbox/wind/network"
+	"github.com/favbox/wind/protocol"
+	"github.com/favbox/wind/protocol/consts"
+	reqI "github.com/favbox/wind/protocol/http1/req"
+	respI "github.com/favbox/wind/protocol/http1/resp"
 )
 
-// SetProxyAuthHeader 基于 proxyURI 为 h 设置代理授权标头。
+// SetProxyAuthHeader 设置请求头的代理授权标头。
 func SetProxyAuthHeader(h *protocol.RequestHeader, proxyURI *protocol.URI) {
 	if username := proxyURI.Username(); username != nil {
 		password := proxyURI.Password()

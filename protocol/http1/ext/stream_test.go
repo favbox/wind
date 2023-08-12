@@ -7,10 +7,10 @@ import (
 	"io"
 	"testing"
 
-	"github.com/favbox/gosky/wind/pkg/common/bytebufferpool"
-	"github.com/favbox/gosky/wind/pkg/common/test/assert"
-	"github.com/favbox/gosky/wind/pkg/common/test/mock"
-	"github.com/favbox/gosky/wind/pkg/protocol"
+	"github.com/favbox/wind/common/bytebufferpool"
+	"github.com/favbox/wind/common/mock"
+	"github.com/favbox/wind/protocol"
+	"github.com/stretchr/testify/assert"
 )
 
 func createChunkedBody(body, rest []byte, trailer map[string]string, hasTrailer bool) []byte {
@@ -49,7 +49,7 @@ func testChunkedSkipRest(t *testing.T, data, rest string) {
 
 	restData, err := io.ReadAll(reader)
 	assert.Nil(t, err)
-	assert.DeepEqual(t, rest, string(restData))
+	assert.Equal(t, rest, string(restData))
 }
 
 func testChunkedSkipRestWithBodySize(t *testing.T, bodySize int) {
@@ -93,9 +93,9 @@ func TestBodyStream_Reset(t *testing.T) {
 	assert.Nil(t, bs.prefetchedBytes)
 	assert.Nil(t, bs.reader)
 	assert.Nil(t, bs.trailer)
-	assert.DeepEqual(t, 0, bs.offset)
-	assert.DeepEqual(t, 0, bs.contentLength)
-	assert.DeepEqual(t, 0, bs.chunkLeft)
+	assert.Equal(t, 0, bs.offset)
+	assert.Equal(t, 0, bs.contentLength)
+	assert.Equal(t, 0, bs.chunkLeft)
 	assert.False(t, bs.chunkEOF)
 }
 
@@ -106,7 +106,7 @@ func TestReadBodyWithStreaming(t *testing.T) {
 		reader := mock.NewZeroCopyReader(string(body))
 		dst, err := ReadBodyWithStreaming(reader, bodySize, -1, nil)
 		assert.Nil(t, err)
-		assert.DeepEqual(t, body, dst)
+		assert.Equal(t, body, dst)
 	})
 
 	t.Run("TestBodyFixedSizeMaxContentLength", func(t *testing.T) {
@@ -115,7 +115,7 @@ func TestReadBodyWithStreaming(t *testing.T) {
 		reader := mock.NewZeroCopyReader(string(body))
 		dst, err := ReadBodyWithStreaming(reader, bodySize, 8*1024*10, nil)
 		assert.Nil(t, err)
-		assert.DeepEqual(t, body[:maxContentLengthInStream], dst)
+		assert.Equal(t, body[:maxContentLengthInStream], dst)
 	})
 
 	t.Run("TestBodyIdentity", func(t *testing.T) {
@@ -124,7 +124,7 @@ func TestReadBodyWithStreaming(t *testing.T) {
 		reader := mock.NewZeroCopyReader(string(body))
 		dst, err := ReadBodyWithStreaming(reader, -2, 512, nil)
 		assert.Nil(t, err)
-		assert.DeepEqual(t, body, dst)
+		assert.Equal(t, body, dst)
 	})
 
 	t.Run("TestErrBodyTooLarge", func(t *testing.T) {
@@ -133,7 +133,7 @@ func TestReadBodyWithStreaming(t *testing.T) {
 		reader := mock.NewZeroCopyReader(string(body))
 		dst, err := ReadBodyWithStreaming(reader, bodySize, 1024, nil)
 		assert.True(t, errors.Is(err, errBodyTooLarge))
-		assert.DeepEqual(t, body[:len(dst)], dst)
+		assert.Equal(t, body[:len(dst)], dst)
 	})
 
 	t.Run("TestErrChunkedStream", func(t *testing.T) {

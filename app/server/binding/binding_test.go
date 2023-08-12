@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/favbox/gosky/wind/pkg/common/test/assert"
-	"github.com/favbox/gosky/wind/pkg/protocol"
-	"github.com/favbox/gosky/wind/pkg/route/param"
+	"github.com/favbox/wind/protocol"
+	"github.com/favbox/wind/route/param"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBindAndValidate(t *testing.T) {
@@ -59,27 +59,27 @@ tailfoobar`
 	var req TestBind
 	err := BindAndValidate(r, &req, para)
 	assert.Nil(t, err)
-	assert.DeepEqual(t, "aaa", req.A)
-	assert.DeepEqual(t, 2, len(req.B))
-	assert.DeepEqual(t, "", req.C)
-	assert.DeepEqual(t, "ddd", req.D)
-	assert.DeepEqual(t, "eee", req.E)
-	assert.DeepEqual(t, "fff", req.F)
-	assert.DeepEqual(t, "TODO", req.G.Filename)
-	assert.DeepEqual(t, "hhh", req.H)
+	assert.Equal(t, "aaa", req.A)
+	assert.Equal(t, 2, len(req.B))
+	assert.Equal(t, "", req.C)
+	assert.Equal(t, "ddd", req.D)
+	assert.Equal(t, "eee", req.E)
+	assert.Equal(t, "fff", req.F)
+	assert.Equal(t, "TODO", req.G.Filename)
+	assert.Equal(t, "hhh", req.H)
 
 	// 测试绑定
 	req = TestBind{}
 	err = Bind(r, &req, para)
 	assert.Nil(t, err)
-	assert.DeepEqual(t, "aaa", req.A)
-	assert.DeepEqual(t, 2, len(req.B))
-	assert.DeepEqual(t, "", req.C)
-	assert.DeepEqual(t, "ddd", req.D)
-	assert.DeepEqual(t, "eee", req.E)
-	assert.DeepEqual(t, "fff", req.F)
-	assert.DeepEqual(t, "TODO", req.G.Filename)
-	assert.DeepEqual(t, "hhh", req.H)
+	assert.Equal(t, "aaa", req.A)
+	assert.Equal(t, 2, len(req.B))
+	assert.Equal(t, "", req.C)
+	assert.Equal(t, "ddd", req.D)
+	assert.Equal(t, "eee", req.E)
+	assert.Equal(t, "fff", req.F)
+	assert.Equal(t, "TODO", req.G.Filename)
+	assert.Equal(t, "hhh", req.H)
 
 	type TestValidate struct {
 		I int `query:"i" vd:"$>20"`
@@ -94,7 +94,7 @@ tailfoobar`
 	bindReq = TestValidate{}
 	err = Bind(r, &bindReq, para)
 	assert.Nil(t, err)
-	assert.DeepEqual(t, 19, bindReq.I)
+	assert.Equal(t, 19, bindReq.I)
 	err = Validate(&bindReq)
 	assert.NotNil(t, err)
 }
@@ -117,23 +117,23 @@ func TestJsonBind(t *testing.T) {
 
 	err := BindAndValidate(r, &req, nil)
 	assert.Nil(t, err)
-	assert.DeepEqual(t, "aaa", req.A)
-	assert.DeepEqual(t, 2, len(req.B))
-	assert.DeepEqual(t, "ccc", req.C)
+	assert.Equal(t, "aaa", req.A)
+	assert.Equal(t, 2, len(req.B))
+	assert.Equal(t, "ccc", req.C)
 	// 注意: 默认情况下不支持json中的字符串到go的int转换。
 	// 你可添加 "string" 标记或用其他 json 解码库来支持此特性。
-	assert.DeepEqual(t, 100, req.D)
+	assert.Equal(t, 100, req.D)
 
 	req = Test{}
 	UseGJSONUnmarshaler()
 	err = BindAndValidate(r, &req, nil)
 	assert.Nil(t, err)
-	assert.DeepEqual(t, "aaa", req.A)
-	assert.DeepEqual(t, 2, len(req.B))
-	assert.DeepEqual(t, "ccc", req.C)
+	assert.Equal(t, "aaa", req.A)
+	assert.Equal(t, 2, len(req.B))
+	assert.Equal(t, "ccc", req.C)
 	// 注意: 默认情况下不支持json中的字符串到go的int转换。
 	// 你可添加 "string" 标记或用其他 json 解码库来支持此特性。
-	assert.DeepEqual(t, 100, req.D)
+	assert.Equal(t, 100, req.D)
 }
 
 // TestQueryParamInconsistency 测试 GetQuery() 的不一致性，request.go 中 GetFunc() 的另一个单元测试与此类似。
@@ -155,8 +155,8 @@ func TestQueryParamInconsistency(t *testing.T) {
 	r.URI().QueryArgs().Set("para2", "test")
 	afterPara1 := req.Para1
 	afterPara2 := *req.Para2
-	assert.DeepEqual(t, beforePara1, afterPara1)
-	assert.DeepEqual(t, beforePara2, afterPara2)
+	assert.Equal(t, beforePara1, afterPara1)
+	assert.Equal(t, beforePara2, afterPara2)
 }
 
 func deepCopyString(str string) string {
@@ -221,11 +221,11 @@ tailfoobar`
 	var req FileParas
 	err := BindAndValidate(r, &req, nil)
 	assert.Nil(t, err)
-	assert.DeepEqual(t, "TODO1", req.F.Filename)
-	assert.DeepEqual(t, "TODO1", req.F1.Filename)
-	assert.DeepEqual(t, 2, len(req.Fs))
-	assert.DeepEqual(t, 2, len(req.Fs1))
-	assert.DeepEqual(t, "TODO3", req.F2.Filename)
+	assert.Equal(t, "TODO1", req.F.Filename)
+	assert.Equal(t, "TODO1", req.F1.Filename)
+	assert.Equal(t, 2, len(req.Fs))
+	assert.Equal(t, 2, len(req.Fs1))
+	assert.Equal(t, "TODO3", req.F2.Filename)
 }
 
 type BindError struct {
@@ -287,7 +287,7 @@ func TestSetErrorFactory(t *testing.T) {
 	if err == nil {
 		t.Fatalf("unexpected nil, expected an error")
 	}
-	assert.DeepEqual(t, "bindErr: expr_path=[bindFailField]: A, cause=[bindErrMsg]: missing required parameter", err.Error())
+	assert.Equal(t, "bindErr: expr_path=[bindFailField]: A, cause=[bindErrMsg]: missing required parameter", err.Error())
 
 	type TestValidate struct {
 		B int `query:"b" vd:"$>100"`
@@ -302,7 +302,7 @@ func TestSetErrorFactory(t *testing.T) {
 	if err == nil {
 		t.Fatalf("unexpected nil, expected an error")
 	}
-	assert.DeepEqual(t, "validateErr: expr_path=[validateFailField]: B, cause=[validateErrMsg]: ", err.Error())
+	assert.Equal(t, "validateErr: expr_path=[validateFailField]: B, cause=[validateErrMsg]: ", err.Error())
 }
 
 func TestMustRegTypeUnmarshal(t *testing.T) {
@@ -334,8 +334,8 @@ func TestMustRegTypeUnmarshal(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	assert.DeepEqual(t, "wind", req.A.B)
-	assert.DeepEqual(t, "binding", req.A.C)
+	assert.Equal(t, "wind", req.A.B)
+	assert.Equal(t, "binding", req.A.C)
 }
 
 func TestMustRegValidateFunc(t *testing.T) {
@@ -389,14 +389,14 @@ func TestQueryAlias(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 		return
 	}
-	assert.DeepEqual(t, 2, len(req.A))
-	assert.DeepEqual(t, 1, int(req.A[0]))
-	assert.DeepEqual(t, 2, int(req.A[1]))
-	assert.DeepEqual(t, 2, len(req.B))
-	assert.DeepEqual(t, 2, req.B[0])
-	assert.DeepEqual(t, 3, req.B[1])
-	assert.DeepEqual(t, "string1", string(req.C))
-	assert.DeepEqual(t, 2, len(req.D))
-	assert.DeepEqual(t, "string2", req.D[0])
-	assert.DeepEqual(t, "string3", req.D[1])
+	assert.Equal(t, 2, len(req.A))
+	assert.Equal(t, 1, int(req.A[0]))
+	assert.Equal(t, 2, int(req.A[1]))
+	assert.Equal(t, 2, len(req.B))
+	assert.Equal(t, 2, req.B[0])
+	assert.Equal(t, 3, req.B[1])
+	assert.Equal(t, "string1", string(req.C))
+	assert.Equal(t, 2, len(req.D))
+	assert.Equal(t, "string2", req.D[0])
+	assert.Equal(t, "string3", req.D[1])
 }

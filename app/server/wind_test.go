@@ -14,20 +14,20 @@ import (
 	"testing"
 	"time"
 
-	"github.com/favbox/gosky/wind/pkg/app"
-	"github.com/favbox/gosky/wind/pkg/app/server/registry"
-	"github.com/favbox/gosky/wind/pkg/common/config"
-	errs "github.com/favbox/gosky/wind/pkg/common/errors"
-	"github.com/favbox/gosky/wind/pkg/common/hlog"
-	"github.com/favbox/gosky/wind/pkg/common/test/assert"
-	"github.com/favbox/gosky/wind/pkg/common/test/mock"
-	"github.com/favbox/gosky/wind/pkg/common/utils"
-	"github.com/favbox/gosky/wind/pkg/network"
-	"github.com/favbox/gosky/wind/pkg/network/standard"
-	"github.com/favbox/gosky/wind/pkg/protocol"
-	"github.com/favbox/gosky/wind/pkg/protocol/consts"
-	"github.com/favbox/gosky/wind/pkg/protocol/http1/req"
-	"github.com/favbox/gosky/wind/pkg/protocol/http1/resp"
+	"github.com/favbox/wind/app"
+	"github.com/favbox/wind/app/server/registry"
+	"github.com/favbox/wind/common/config"
+	errs "github.com/favbox/wind/common/errors"
+	"github.com/favbox/wind/common/hlog"
+	"github.com/favbox/wind/common/mock"
+	"github.com/favbox/wind/common/utils"
+	"github.com/favbox/wind/network"
+	"github.com/favbox/wind/network/standard"
+	"github.com/favbox/wind/protocol"
+	"github.com/favbox/wind/protocol/consts"
+	"github.com/favbox/wind/protocol/http1/req"
+	"github.com/favbox/wind/protocol/http1/resp"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestWind_Run(t *testing.T) {
@@ -49,7 +49,7 @@ func TestWind_Run(t *testing.T) {
 	resp, err := http.Get("http://localhost:8888/test")
 	assert.NotNil(t, err)
 	assert.Nil(t, resp)
-	assert.DeepEqual(t, uint32(0), atomic.LoadUint32(&testInt))
+	assert.Equal(t, uint32(0), atomic.LoadUint32(&testInt))
 }
 
 func TestWind_GracefulShutdown(t *testing.T) {
@@ -114,10 +114,10 @@ func TestWind_GracefulShutdown(t *testing.T) {
 	<-ch
 	assert.Nil(t, err)
 	assert.NotNil(t, resp)
-	assert.DeepEqual(t, true, resp.Close)
-	assert.DeepEqual(t, uint32(1), atomic.LoadUint32(&shutdownHook1))
-	assert.DeepEqual(t, uint32(2), atomic.LoadUint32(&shutdownHook2))
-	assert.DeepEqual(t, uint32(3), atomic.LoadUint32(&shutdownHook3))
+	assert.Equal(t, true, resp.Close)
+	assert.Equal(t, uint32(1), atomic.LoadUint32(&shutdownHook1))
+	assert.Equal(t, uint32(2), atomic.LoadUint32(&shutdownHook2))
+	assert.Equal(t, uint32(3), atomic.LoadUint32(&shutdownHook3))
 
 	<-ch2
 
@@ -136,10 +136,10 @@ func TestLoadHTMLGlob(t *testing.T) {
 	go wind.Run()
 	time.Sleep(200 * time.Millisecond)
 	resp, _ := http.Get("http://127.0.0.1:8888/index")
-	assert.DeepEqual(t, consts.StatusOK, resp.StatusCode)
+	assert.Equal(t, consts.StatusOK, resp.StatusCode)
 	b := make([]byte, 100)
 	n, _ := resp.Body.Read(b)
-	assert.DeepEqual(t, `<html><h1>主站</h1></html>`, string(b[:n]))
+	assert.Equal(t, `<html><h1>主站</h1></html>`, string(b[:n]))
 }
 
 func TestLoadHTMLFiles(t *testing.T) {
@@ -158,10 +158,10 @@ func TestLoadHTMLFiles(t *testing.T) {
 	go wind.Run()
 	time.Sleep(200 * time.Millisecond)
 	resp, _ := http.Get("http://localhost:8888/raw")
-	assert.DeepEqual(t, consts.StatusOK, resp.StatusCode)
+	assert.Equal(t, consts.StatusOK, resp.StatusCode)
 	b := make([]byte, 100)
 	n, _ := resp.Body.Read(b)
-	assert.DeepEqual(t, "<h1>Date: 2017/07/01</h1>", string(b[:n]))
+	assert.Equal(t, "<h1>Date: 2017/07/01</h1>", string(b[:n]))
 }
 
 func formatAsDate(t time.Time) string {
@@ -172,17 +172,17 @@ func formatAsDate(t time.Time) string {
 func TestWind_Engine_Use(t *testing.T) {
 	router := New()
 	router.Use(func(c context.Context, ctx *app.RequestContext) {})
-	assert.DeepEqual(t, 1, len(router.Handlers))
+	assert.Equal(t, 1, len(router.Handlers))
 	router.Use(func(c context.Context, ctx *app.RequestContext) {})
-	assert.DeepEqual(t, 2, len(router.Handlers))
+	assert.Equal(t, 2, len(router.Handlers))
 }
 
 func TestWind_Engine_GetServerName(t *testing.T) {
 	router := New()
-	assert.DeepEqual(t, []byte("wind"), router.GetServerName())
+	assert.Equal(t, []byte("wind"), router.GetServerName())
 	router = New()
 	router.Name = "test_name"
-	assert.DeepEqual(t, []byte(string(router.GetServerName())), router.GetServerName())
+	assert.Equal(t, []byte(string(router.GetServerName())), router.GetServerName())
 }
 
 func TestServer_Run(t *testing.T) {
@@ -198,21 +198,21 @@ func TestServer_Run(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	resp, err := http.Get("http://localhost:8888/test")
 	assert.Nil(t, err)
-	assert.DeepEqual(t, consts.StatusOK, resp.StatusCode)
+	assert.Equal(t, consts.StatusOK, resp.StatusCode)
 	b := make([]byte, 5)
 	resp.Body.Read(b)
-	assert.DeepEqual(t, "/test", string(b))
+	assert.Equal(t, "/test", string(b))
 
 	resp, err = http.Get("http://localhost:8888/foo")
 	assert.Nil(t, err)
-	assert.DeepEqual(t, consts.StatusNotFound, resp.StatusCode)
+	assert.Equal(t, consts.StatusNotFound, resp.StatusCode)
 
 	resp, err = http.Post("http://127.0.0.1:8888/redirect", "", nil)
 	assert.Nil(t, err)
-	assert.DeepEqual(t, consts.StatusOK, resp.StatusCode)
+	assert.Equal(t, consts.StatusOK, resp.StatusCode)
 	b = make([]byte, 5)
 	resp.Body.Read(b)
-	assert.DeepEqual(t, "/test", string(b))
+	assert.Equal(t, "/test", string(b))
 
 	ctx, cancel := context.WithTimeout(context.Background(), 0)
 	defer cancel()
@@ -238,8 +238,8 @@ func TestNotAbsolutePath(t *testing.T) {
 		t.Fatalf("不期待的错误：%s", err)
 	}
 	wind.ServeHTTP(context.Background(), ctx)
-	assert.DeepEqual(t, consts.StatusOK, ctx.Response.StatusCode())
-	assert.DeepEqual(t, ctx.Request.Body(), ctx.Response.Body())
+	assert.Equal(t, consts.StatusOK, ctx.Response.StatusCode())
+	assert.Equal(t, ctx.Request.Body(), ctx.Response.Body())
 
 	s = "POST a?a=b HTTP/1.1\r\nContent-Length: 5\r\nContent-Type: foo/bar\r\n\r\nabcdef4343"
 	zr = mock.NewZeroCopyReader(s)
@@ -249,11 +249,11 @@ func TestNotAbsolutePath(t *testing.T) {
 		t.Fatalf("不期待的错误：%s", err)
 	}
 	wind.ServeHTTP(context.Background(), ctx)
-	assert.DeepEqual(t, consts.StatusOK, ctx.Response.StatusCode())
-	assert.DeepEqual(t, ctx.Request.Body(), ctx.Response.Body())
+	assert.Equal(t, consts.StatusOK, ctx.Response.StatusCode())
+	assert.Equal(t, ctx.Request.Body(), ctx.Response.Body())
 }
 
-// 靠自 router
+// 拷贝自 router
 var default400Body = []byte("400 错误请求")
 
 func TestNotAbsolutePathWithRawPath(t *testing.T) {
@@ -273,8 +273,8 @@ func TestNotAbsolutePathWithRawPath(t *testing.T) {
 		t.Fatalf("unexpected error: %s", err)
 	}
 	engine.ServeHTTP(context.Background(), ctx)
-	assert.DeepEqual(t, consts.StatusBadRequest, ctx.Response.StatusCode())
-	assert.DeepEqual(t, default400Body, ctx.Response.Body())
+	assert.Equal(t, consts.StatusBadRequest, ctx.Response.StatusCode())
+	assert.Equal(t, default400Body, ctx.Response.Body())
 
 	s = "POST a?a=b HTTP/1.1\r\nContent-Length: 5\r\nContent-Type: foo/bar\r\n\r\nabcdef4343"
 	zr = mock.NewZeroCopyReader(s)
@@ -284,8 +284,8 @@ func TestNotAbsolutePathWithRawPath(t *testing.T) {
 		t.Fatalf("unexpected error: %s", err)
 	}
 	engine.ServeHTTP(context.Background(), ctx)
-	assert.DeepEqual(t, consts.StatusBadRequest, ctx.Response.StatusCode())
-	assert.DeepEqual(t, default400Body, ctx.Response.Body())
+	assert.Equal(t, consts.StatusBadRequest, ctx.Response.StatusCode())
+	assert.Equal(t, default400Body, ctx.Response.Body())
 }
 
 func TestWithBasePath(t *testing.T) {
@@ -299,7 +299,7 @@ func TestWithBasePath(t *testing.T) {
 	body := strings.NewReader(r.Form.Encode())
 	resp, err := http.Post("http://127.0.0.1:19898/wind/test", "application/x-www-form-urlencoded", body)
 	assert.Nil(t, err)
-	assert.DeepEqual(t, consts.StatusOK, resp.StatusCode)
+	assert.Equal(t, consts.StatusOK, resp.StatusCode)
 }
 
 func TestNotEnoughBodySize(t *testing.T) {
@@ -313,9 +313,9 @@ func TestNotEnoughBodySize(t *testing.T) {
 	body := strings.NewReader(r.Form.Encode())
 	resp, err := http.Post("http://127.0.0.1:8889/test", "application/x-www-form-urlencoded", body)
 	assert.Nil(t, err)
-	assert.DeepEqual(t, 413, resp.StatusCode)
+	assert.Equal(t, 413, resp.StatusCode)
 	bodyBytes, _ := io.ReadAll(resp.Body)
-	assert.DeepEqual(t, "请求实体过大", string(bodyBytes))
+	assert.Equal(t, "请求实体过大", string(bodyBytes))
 }
 
 func TestEnoughBodySize(t *testing.T) {
@@ -329,7 +329,7 @@ func TestEnoughBodySize(t *testing.T) {
 	r.Form.Add("xxxxxx", "xxx")
 	body := strings.NewReader(r.Form.Encode())
 	resp, _ := http.Post("http://127.0.0.1:8892/test", "application/x-www-form-urlencoded", body)
-	assert.DeepEqual(t, consts.StatusOK, resp.StatusCode)
+	assert.Equal(t, consts.StatusOK, resp.StatusCode)
 }
 
 func TestRequestCtxHijack(t *testing.T) {
@@ -557,7 +557,7 @@ func TestServiceRegisterFailed(t *testing.T) {
 	srv := New(opts...)
 	srv.Spin()
 	time.Sleep(2 * time.Second)
-	assert.Assert(t, atomic.LoadInt32(&rCount) == 1)
+	assert.True(t, atomic.LoadInt32(&rCount) == 1)
 }
 
 func TestServiceDeregisterFailed(t *testing.T) {
@@ -584,8 +584,8 @@ func TestServiceDeregisterFailed(t *testing.T) {
 	defer cancel()
 	_ = srv.Shutdown(ctx)
 	time.Sleep(1 * time.Second)
-	assert.Assert(t, atomic.LoadInt32(&rCount) == 1)
-	assert.Assert(t, atomic.LoadInt32(&drCount) == 1)
+	assert.True(t, atomic.LoadInt32(&rCount) == 1)
+	assert.True(t, atomic.LoadInt32(&drCount) == 1)
 }
 
 func TestServiceRegistryInfo(t *testing.T) {
@@ -595,10 +595,10 @@ func TestServiceRegistryInfo(t *testing.T) {
 		ServiceName: "wind.api.test",
 	}
 	checkInfo := func(info *registry.Info) {
-		assert.Assert(t, info.Weight == registryInfo.Weight)
-		assert.Assert(t, info.ServiceName == "wind.api.test")
-		assert.Assert(t, len(info.Tags) == len(registryInfo.Tags), info.Tags)
-		assert.Assert(t, info.Tags["aa"] == registryInfo.Tags["aa"], info.Tags)
+		assert.True(t, info.Weight == registryInfo.Weight)
+		assert.True(t, info.ServiceName == "wind.api.test")
+		assert.True(t, len(info.Tags) == len(registryInfo.Tags), info.Tags)
+		assert.True(t, info.Tags["aa"] == registryInfo.Tags["aa"], info.Tags)
 	}
 	var rCount int32
 	var drCount int32
@@ -624,13 +624,13 @@ func TestServiceRegistryInfo(t *testing.T) {
 	defer cancel()
 	_ = srv.Shutdown(ctx)
 	time.Sleep(2 * time.Second)
-	assert.Assert(t, atomic.LoadInt32(&rCount) == 1)
-	assert.Assert(t, atomic.LoadInt32(&drCount) == 1)
+	assert.True(t, atomic.LoadInt32(&rCount) == 1)
+	assert.True(t, atomic.LoadInt32(&drCount) == 1)
 }
 
 func TestServiceRegistryNoInitInfo(t *testing.T) {
 	checkInfo := func(info *registry.Info) {
-		assert.Assert(t, info == nil)
+		assert.True(t, info == nil)
 	}
 	var rCount int32
 	var drCount int32
@@ -656,8 +656,8 @@ func TestServiceRegistryNoInitInfo(t *testing.T) {
 	defer cancel()
 	_ = srv.Shutdown(ctx)
 	time.Sleep(2 * time.Second)
-	assert.Assert(t, atomic.LoadInt32(&rCount) == 1)
-	assert.Assert(t, atomic.LoadInt32(&drCount) == 1)
+	assert.True(t, atomic.LoadInt32(&rCount) == 1)
+	assert.True(t, atomic.LoadInt32(&drCount) == 1)
 }
 
 type testTracer struct{}
@@ -677,7 +677,7 @@ func (t testTracer) Finish(ctx context.Context, c *app.RequestContext) {}
 //func TestReuseCtx(t *testing.T) {
 //	h := New(WithTracer(testTracer{}), WithHostPorts("localhost:9228"))
 //	h.GET("/ping", func(ctx context.Context, c *app.RequestContext) {
-//		assert.DeepEqual(t, 0, ctx.Value("testKey").(int))
+//		assert.Equal(t, 0, ctx.Value("testKey").(int))
 //	})
 //
 //	go h.Spin()
@@ -699,7 +699,7 @@ type CloseWithoutResetBuffer interface {
 //		WithOnConnect(func(ctx context.Context, conn network.Conn) context.Context {
 //			b, err := conn.Peek(3)
 //			assert.Nil(t, err)
-//			assert.DeepEqual(t, string(b), "GET")
+//			assert.Equal(t, string(b), "GET")
 //			if c, ok := conn.(CloseWithoutResetBuffer); ok {
 //				c.CloseNoResetBuffer()
 //			} else {
@@ -714,7 +714,7 @@ type CloseWithoutResetBuffer interface {
 //	go h.Spin()
 //	time.Sleep(time.Second)
 //	_, _, err := c.Get(context.Background(), nil, "http://127.0.0.1:9229/ping")
-//	assert.DeepEqual(t, "the server closed connection before returning the first response byte. Make sure the server returns 'Connection: close' response header before closing the connection", err.Error())
+//	assert.Equal(t, "the server closed connection before returning the first response byte. Make sure the server returns 'Connection: close' response header before closing the connection", err.Error())
 //
 //	h = New(
 //		WithOnAccept(func(conn net.Conn) context.Context {
@@ -734,7 +734,7 @@ type CloseWithoutResetBuffer interface {
 //
 //	h = New(
 //		WithOnAccept(func(conn net.Conn) context.Context {
-//			assert.DeepEqual(t, conn.LocalAddr().String(), "127.0.0.1:9231")
+//			assert.Equal(t, conn.LocalAddr().String(), "127.0.0.1:9231")
 //			return context.Background()
 //		}),
 //		WithHostPorts("localhost:9231"),

@@ -39,8 +39,7 @@ type Writer interface {
 	// Malloc 分配一块 n 字节的内存缓冲区来暂存数据。
 	Malloc(n int) (buf []byte, err error)
 
-	// WriteBinary 向用户缓冲区写入字节切片。
-	// 注意：在成功刷新之前，缓冲区 b 应有效。
+	// WriteBinary 向用户缓冲区写入字节切片。注意：在成功刷新之前，b 应有效。
 	WriteBinary(b []byte) (n int, err error)
 
 	// Flush 向对端发送数据。

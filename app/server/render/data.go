@@ -1,7 +1,7 @@
 package render
 
 import (
-	"github.com/favbox/gosky/wind/pkg/protocol"
+	"github.com/favbox/wind/protocol"
 )
 
 // Data 包含要渲染的二进制数据和自定义内容类型。

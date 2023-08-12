@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	errs "github.com/favbox/gosky/wind/pkg/common/errors"
+	errs "github.com/favbox/wind/common/errors"
 )
 
 var (

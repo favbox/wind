@@ -3,13 +3,14 @@ package resp
 import (
 	"sync"
 
-	"github.com/favbox/gosky/wind/pkg/network"
-	"github.com/favbox/gosky/wind/pkg/protocol"
-	"github.com/favbox/gosky/wind/pkg/protocol/http1/ext"
+	"github.com/favbox/wind/network"
+	"github.com/favbox/wind/protocol"
+	"github.com/favbox/wind/protocol/http1/ext"
 )
 
 var _ network.ExtWriter = (*chunkedBodyWriter)(nil)
 
+// 分块正文写入器。
 type chunkedBodyWriter struct {
 	sync.Once
 	finalizeErr error
@@ -18,11 +19,7 @@ type chunkedBodyWriter struct {
 	w           network.Writer
 }
 
-// 将在写入之前对分块数据 p 进行编码。
-// 若写入成功则返回 p 的长度。
-//
-// 注意：Write 将使用用户缓冲区进行刷新。
-// 刷新成功之前，需确保缓冲区可用。
+// 分块写入 p。
 func (c *chunkedBodyWriter) Write(p []byte) (n int, err error) {
 	if !c.wroteHeader {
 		c.r.Header.SetContentLength(-1) // -1 意为分块传输
@@ -37,12 +34,12 @@ func (c *chunkedBodyWriter) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
+// Flush 将数据刷新至对端。
 func (c *chunkedBodyWriter) Flush() error {
 	return c.w.Flush()
 }
 
-// Finalize 将写入结束块和结尾部分并刷新写入器。
-// 警告：不要自己调用该方法，除非你知道自己在做什么。
+// Finalize 将写入结束块和结尾部分并刷新写入器。警告：不懂别用。
 func (c *chunkedBodyWriter) Finalize() error {
 	c.Do(func() {
 		c.finalizeErr = ext.WriteChunk(c.w, nil, true)

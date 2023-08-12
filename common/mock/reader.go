@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-// ZeroCopyReader 用于为测试创建的 ZeroCopyReader。
+// ZeroCopyReader 模拟的零拷贝读取器。
 //
 // 注意：原则上，单元测试模拟测试时应使用 netpoll.NewReader 创建的 zcReader，
 // 但因为其未实现 io.Reader 接口，所以 io.Reader 的测试要求被此结构体取代。
@@ -43,6 +43,7 @@ func (m ZeroCopyReader) ReadBinary(n int) (p []byte, err error) {
 	panic("implement me")
 }
 
+// NewZeroCopyReader 创建模拟的零拷贝读取器。
 func NewZeroCopyReader(r string) ZeroCopyReader {
 	br := bufio.NewReaderSize(bytes.NewBufferString(r), len(r))
 	return ZeroCopyReader{br}

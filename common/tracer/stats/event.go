@@ -4,7 +4,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/favbox/gosky/wind/pkg/common/errors"
+	"github.com/favbox/wind/common/errors"
 )
 
 // EventIndex 表示一个唯一的事件。

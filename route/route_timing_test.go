@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/favbox/gosky/wind/pkg/app"
-	"github.com/favbox/gosky/wind/pkg/common/config"
-	"github.com/favbox/gosky/wind/pkg/protocol"
+	"github.com/favbox/wind/app"
+	"github.com/favbox/wind/common/config"
+	"github.com/favbox/wind/protocol"
 )
 
 type TestRoute struct {

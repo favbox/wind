@@ -591,7 +591,7 @@ func TestRequestContext_HandlerName(t *testing.T) {
 	c := NewContext(0)
 	c.handlers = HandlersChain{testFunc, testFunc2}
 	val := c.HandlerName()
-	assert.Equal(t, "github.com/favbox/gosky/wind/pkg/app.testFunc2", val)
+	assert.Equal(t, "github.com/favbox/wind/app.testFunc2", val)
 }
 
 func TestContextError(t *testing.T) {

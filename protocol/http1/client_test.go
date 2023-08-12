@@ -305,7 +305,7 @@ func TestWriteTimeoutPriority(t *testing.T) {
 	case <-time.After(time.Second * 2):
 		t.Fatalf("should use writeTimeout in request options")
 	case err := <-ch:
-		assert.Equal(t, mock.ErrWriteTimeout, err.Error())
+		assert.Equal(t, mock.ErrWriteTimeout.Error(), err.Error())
 	}
 }
 

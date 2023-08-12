@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	errs "github.com/favbox/gosky/wind/pkg/common/errors"
+	errs "github.com/favbox/wind/common/errors"
 	"github.com/stretchr/testify/assert"
 )
 

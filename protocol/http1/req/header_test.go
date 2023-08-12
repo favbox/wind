@@ -3,10 +3,10 @@ package req
 import (
 	"testing"
 
-	"github.com/favbox/gosky/wind/pkg/common/test/assert"
-	"github.com/favbox/gosky/wind/pkg/common/test/mock"
-	"github.com/favbox/gosky/wind/pkg/protocol"
-	"github.com/favbox/gosky/wind/pkg/protocol/consts"
+	"github.com/favbox/wind/common/mock"
+	"github.com/favbox/wind/protocol"
+	"github.com/favbox/wind/protocol/consts"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRequestHeader_Read(t *testing.T) {
@@ -16,19 +16,19 @@ func TestRequestHeader_Read(t *testing.T) {
 	ReadHeader(&rh, zr)
 
 	// firstline
-	assert.DeepEqual(t, []byte(consts.MethodPut), rh.Method())
-	assert.DeepEqual(t, []byte("/foo/bar"), rh.RequestURI())
+	assert.Equal(t, []byte(consts.MethodPut), rh.Method())
+	assert.Equal(t, []byte("/foo/bar"), rh.RequestURI())
 	assert.True(t, rh.IsHTTP11())
 
 	// headers
-	assert.DeepEqual(t, 5, rh.ContentLength())
-	assert.DeepEqual(t, []byte("foo/bar"), rh.ContentType())
+	assert.Equal(t, 5, rh.ContentLength())
+	assert.Equal(t, []byte("foo/bar"), rh.ContentType())
 	count := 0
 	rh.VisitAll(func(key, value []byte) {
 		count += 1
 	})
-	assert.DeepEqual(t, 6, count)
-	assert.DeepEqual(t, []byte("foo"), rh.UserAgent())
-	assert.DeepEqual(t, []byte("127.0.0.1"), rh.Host())
-	assert.DeepEqual(t, []byte("100-continue"), rh.Peek("Expect"))
+	assert.Equal(t, 6, count)
+	assert.Equal(t, []byte("foo"), rh.UserAgent())
+	assert.Equal(t, []byte("127.0.0.1"), rh.Host())
+	assert.Equal(t, []byte("100-continue"), rh.Peek("Expect"))
 }

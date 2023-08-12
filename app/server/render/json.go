@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 
-	hjson "github.com/favbox/gosky/wind/pkg/common/json"
-	"github.com/favbox/gosky/wind/pkg/protocol"
+	hjson "github.com/favbox/wind/common/json"
+	"github.com/favbox/wind/protocol"
 )
 
 var jsonContentType = "application/json; charset=utf-8"
