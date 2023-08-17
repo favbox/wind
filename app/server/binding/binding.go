@@ -70,7 +70,7 @@ func MustRegTypeUnmarshal(t reflect.Type, fn func(v string, emptyAsZero bool) (r
 //
 //	若 force=true 则允许覆盖已存在的同名函数。
 //	一旦调用，将持续生效。
-func MustRegValidateFunc(funcName string, fn func(args ...interface{}) error, force ...bool) {
+func MustRegValidateFunc(funcName string, fn func(args ...any) error, force ...bool) {
 	validator.RegFunc(funcName, fn, force...)
 }
 
@@ -95,6 +95,6 @@ func UseGJSONUnmarshaler() {
 // 注意：
 //
 //	一旦调用，将持续生效。
-func UseThirdPartyJSONUnmarshaler(unmarshaler func(data []byte, v interface{}) error) {
+func UseThirdPartyJSONUnmarshaler(unmarshaler func(data []byte, v any) error) {
 	binding.ResetJSONUnmarshaler(unmarshaler)
 }

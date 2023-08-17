@@ -10,8 +10,8 @@ import (
 
 func main() {
 	wind := server.Default(server.WithHostPorts("0.0.0.0:8888"))
-	wind.GET("/", func(c context.Context, ctx *app.RequestContext) {
-		ctx.String(consts.StatusOK, "hello, world!")
+	wind.GET("/hello", func(ctx context.Context, c *app.RequestContext) {
+		c.String(consts.StatusOK, "hello world")
 	})
 	wind.Spin()
 }
