@@ -36,3 +36,16 @@ func TestNewChunkedBodyWriter1(t *testing.T) {
 	assert.Contains(t, string(out), "5"+string(bytestr.StrCRLF)+"hello")
 	assert.Contains(t, string(out), "0"+string(bytestr.StrCRLF)+string(bytestr.StrCRLF))
 }
+
+func TestNewChunkedBodyWriterNoData(t *testing.T) {
+	resp := protocol.AcquireResponse()
+	resp.Header.Set("Foo", "Bar")
+	mockConn := mock.NewConn("")
+	w := NewChunkedBodyWriter(resp, mockConn)
+	w.Finalize()
+	w.Flush()
+	out, _ := mockConn.WriterRecorder().ReadBinary(mockConn.WriterRecorder().WroteLen())
+	assert.Contains(t, string(out), "Transfer-Encoding: chunked")
+	assert.Contains(t, string(out), "Foo: Bar")
+	assert.Contains(t, string(out), "0"+string(bytestr.StrCRLF)+string(bytestr.StrCRLF))
+}

@@ -9,6 +9,7 @@ import (
 
 	errs "github.com/favbox/wind/common/errors"
 	"github.com/favbox/wind/common/utils"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/internal/bytesconv"
 	"github.com/favbox/wind/internal/bytestr"
 	"github.com/favbox/wind/network"
@@ -193,12 +194,15 @@ func WriteBodyChunked(w network.Writer, r io.Reader) error {
 			if err == nil {
 				panic("BUG: io.Reader 返回了 (0, nil)")
 			}
-			if err == io.EOF {
-				if err = WriteChunk(w, buf[:0], true); err != nil {
-					break
-				}
-				err = nil
+			if !errors.Is(err, io.EOF) {
+				wlog.SystemLogger().Warnf("写入分块响应体时遇到错误，这可能会导致响应体的内容不完整。错误是: %s", err.Error())
 			}
+
+			if err = WriteChunk(w, buf[:0], true); err != nil {
+				break
+			}
+			err = nil
+
 			break
 		}
 		if err = WriteChunk(w, buf[:n], true); err != nil {

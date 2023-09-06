@@ -10,6 +10,7 @@ import (
 	"github.com/cloudwego/netpoll"
 	errs "github.com/favbox/wind/common/errors"
 	"github.com/favbox/wind/common/mock"
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/protocol"
 	"github.com/stretchr/testify/assert"
 )
@@ -107,6 +108,9 @@ func TestReadRawHeaders(t *testing.T) {
 }
 
 func TestBodyChunked(t *testing.T) {
+	var log bytes.Buffer
+	wlog.SetOutput(&log)
+
 	body := "foobar baz aaa bbb ccc"
 	chunk := "16\r\nfoobar baz aaa bbb ccc\r\n0\r\n"
 	b := bytes.NewBufferString(body)
@@ -121,6 +125,22 @@ func TestBodyChunked(t *testing.T) {
 	rb, err := ReadBody(zr, -1, 0, nil)
 	assert.Nil(t, err)
 	assert.Equal(t, body, string(rb))
+
+	assert.Equal(t, 0, log.Len())
+}
+
+func TestBrokenBodyChunked(t *testing.T) {
+	brokenReader := mock.NewBrokenConn("")
+	var log bytes.Buffer
+	wlog.SetOutput(&log)
+
+	var w bytes.Buffer
+	zw := netpoll.NewWriter(&w)
+	err := WriteBodyChunked(zw, brokenReader)
+	assert.Nil(t, err)
+
+	assert.Equal(t, []byte("0\r\n"), w.Bytes())
+	assert.True(t, bytes.Contains(log.Bytes(), []byte("写入分块响应体时遇到错误，这可能会导致响应体的内容不完整。")))
 }
 
 func TestBodyFixedSize(t *testing.T) {

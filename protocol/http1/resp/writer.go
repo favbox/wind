@@ -1,6 +1,7 @@
 package resp
 
 import (
+	"runtime"
 	"sync"
 
 	"github.com/favbox/wind/network"
@@ -9,6 +10,16 @@ import (
 )
 
 var _ network.ExtWriter = (*chunkedBodyWriter)(nil)
+
+var chunkReaderPool sync.Pool
+
+func init() {
+	chunkReaderPool = sync.Pool{
+		New: func() any {
+			return &chunkedBodyWriter{}
+		},
+	}
+}
 
 // 分块正文写入器。
 type chunkedBodyWriter struct {
@@ -42,6 +53,14 @@ func (c *chunkedBodyWriter) Flush() error {
 // Finalize 将写入结束块和结尾部分并刷新写入器。警告：不懂别用。
 func (c *chunkedBodyWriter) Finalize() error {
 	c.Do(func() {
+		// 对于没有实际数据的情况
+		if !c.wroteHeader {
+			c.r.Header.SetContentLength(-1)
+			if c.finalizeErr = WriteHeader(&c.r.Header, c.w); c.finalizeErr != nil {
+				return
+			}
+			c.wroteHeader = true
+		}
 		c.finalizeErr = ext.WriteChunk(c.w, nil, true)
 		if c.finalizeErr != nil {
 			return
@@ -51,9 +70,19 @@ func (c *chunkedBodyWriter) Finalize() error {
 	return c.finalizeErr
 }
 
+func (c *chunkedBodyWriter) release() {
+	c.r = nil
+	c.w = nil
+	c.finalizeErr = nil
+	c.wroteHeader = false
+	chunkReaderPool.Put(c)
+}
+
 func NewChunkedBodyWriter(r *protocol.Response, w network.Writer) network.ExtWriter {
-	return &chunkedBodyWriter{
-		r: r,
-		w: w,
-	}
+	extWriter := chunkReaderPool.Get().(*chunkedBodyWriter)
+	extWriter.r = r
+	extWriter.w = w
+	extWriter.Once = sync.Once{}
+	runtime.SetFinalizer(extWriter, (*chunkedBodyWriter).release)
+	return extWriter
 }

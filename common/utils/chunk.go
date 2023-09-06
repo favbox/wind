@@ -45,10 +45,9 @@ func ParseChunkSize(r network.Reader) (int, error) {
 	return n, nil
 }
 
-// SkipCRLF 跳过读取器开头的回车换行符 crlf。
+// SkipCRLF 跳过读取器开头的回车换行符 CRLF。
 func SkipCRLF(reader network.Reader) error {
 	p, err := reader.Peek(len(bytestr.StrCRLF))
-	reader.Skip(len(p))
 	if err != nil {
 		return err
 	}
@@ -56,5 +55,7 @@ func SkipCRLF(reader network.Reader) error {
 		return errBrokenChunk
 	}
 
+	// 仅当下一个字符是 CRLF 时才跳过
+	reader.Skip(len(p))
 	return nil
 }

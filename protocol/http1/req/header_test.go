@@ -32,3 +32,5 @@ func TestRequestHeader_Read(t *testing.T) {
 	assert.Equal(t, []byte("127.0.0.1"), rh.Host())
 	assert.Equal(t, []byte("100-continue"), rh.Peek("Expect"))
 }
+
+// TODO 补全测试
