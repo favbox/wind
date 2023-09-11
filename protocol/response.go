@@ -19,6 +19,11 @@ var (
 
 	// 响应的实例池，减少 GC
 	responsePool sync.Pool
+
+	// NoResponseBody 是一个无字节的 io.ReadCloser。
+	// Read 始终返回 EOF，Close 总是返回 nil。
+	// 可表示一个没有字节的响应。
+	NoResponseBody = noBody{}
 )
 
 // Response 表示 HTTP 请求。
@@ -148,6 +153,9 @@ func (resp *Response) BodyGunzip() ([]byte, error) {
 
 // BodyStream 返回响应的正文流。
 func (resp *Response) BodyStream() io.Reader {
+	if resp.bodyStream == nil {
+		resp.bodyStream = NoResponseBody
+	}
 	return resp.bodyStream
 }
 

@@ -865,7 +865,8 @@ func (c *HostClient) doNonNilReqResp(req *protocol.Request, resp *protocol.Respo
 
 	shouldCloseConn = resetConnection || req.ConnectionClose() || resp.ConnectionClose()
 
-	if c.ResponseBodyStream {
+	// 在流模式下，如果线上无内容依然可以立即关闭或释放连接。
+	if c.ResponseBodyStream && resp.BodyStream() != protocol.NoResponseBody {
 		return false, err
 	}
 

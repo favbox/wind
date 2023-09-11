@@ -36,7 +36,6 @@ var (
 // NoBody 是一个无字节的 io.ReadCloser。
 // Read 始终返回 EOF，Close 总是返回 nil。
 // NoBody 可用于发送客户端请求时，明确请求的消息体为零字节。
-// 另一种实现：只需将 Request.Body 设置为 nil。
 var NoBody = noBody{}
 
 type noBody struct{}
