@@ -218,10 +218,15 @@ func (l *defaultLogger) logf(lv Level, format *string, v ...any) {
 	}
 	msg := lv.String()
 	if format != nil {
-		msg += fmt.Sprintf(*format, v...)
+		if len(v) > 0 {
+			msg += fmt.Sprintf(*format, v...)
+		} else {
+			msg += *format
+		}
 	} else {
 		msg += fmt.Sprint(v...)
 	}
+
 	_ = l.std.Output(l.depth, msg)
 	if lv == LevelFatal {
 		os.Exit(1)

@@ -226,6 +226,12 @@ func (h *RequestHeader) DelBytes(key []byte) {
 	h.del(h.bufKV.key)
 }
 
+// Del 删除指定 key 对应的标头。
+func (h *RequestHeader) Del(key string) {
+	k := getHeaderKeyBytes(&h.bufKV, key, h.disableNormalizing)
+	h.del(k)
+}
+
 // 删除指定 key 对应的标头。
 func (h *RequestHeader) del(key []byte) {
 	switch string(key) {

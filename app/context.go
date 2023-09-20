@@ -1083,8 +1083,8 @@ type (
 	// ClientIP 是获取获取客户端 IP 的自定义函数。
 	ClientIP        func(ctx *RequestContext) string
 	ClientIPOptions struct {
-		RemoteIPHeaders []string        // 客户端IP标头名切片，默认为 []string{"X-Real-IP", "X-Forwarded-For"}
-		TrustedProxies  map[string]bool // 是可信代理非客户端IP，故需从 X-Forwarded-For 中跳过。默认IP为 0.0.0.0，亦为可信代理。
+		RemoteIPHeaders []string     // 客户端IP标头名切片，默认为 []string{"X-Real-IP", "X-Forwarded-For"}
+		TrustedCIDRs    []*net.IPNet // 是可信代理IP(非客户端)，故需从 X-Forwarded-For 中跳过。默认IP为 0.0.0.0，亦为可信代理。
 	}
 
 	// FormValueFunc 是获取表单值的自定义函数。
@@ -1110,10 +1110,22 @@ var defaultFormValue = func(ctx *RequestContext, key string) []byte {
 	return nil
 }
 
-var defaultClientIPOptions = ClientIPOptions{
-	RemoteIPHeaders: []string{"X-Real-IP", "X-Forwarded-For"},
-	TrustedProxies:  map[string]bool{"0.0.0.0": true},
+var defaultTrustedCIDRs = []*net.IPNet{
+	{ // 0.0.0.0/0 (IPv4)
+		IP:   net.IP{0x0, 0x0, 0x0, 0x0},
+		Mask: net.IPMask{0x0, 0x0, 0x0, 0x0},
+	},
+	{ // ::/0 (IPv6)
+		IP:   net.IP{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0},
+		Mask: net.IPMask{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0},
+	},
 }
+
+var defaultClientIPOptions = ClientIPOptions{
+	RemoteIPHeaders: []string{"X-Forwarded-For", "X-Real-IP"},
+	TrustedCIDRs:    defaultTrustedCIDRs,
+}
+
 var defaultClientIP = ClientIPWithOption(defaultClientIPOptions)
 
 // SetClientIPFunc 设置 ClientIP 函数实现自定义 IP 获取方法。
@@ -1122,24 +1134,30 @@ func SetClientIPFunc(fn ClientIP) {
 	defaultClientIP = fn
 }
 
-// ClientIPWithOption 生成给定客户端IP 选项的 ClientIP 函数，并由 engine.SetClientIPFunc 设置。
+// ClientIPWithOption 用于生成自定义的 ClientIP 函数，由 engine.SetClientIPFunc 设置。
 func ClientIPWithOption(opts ClientIPOptions) ClientIP {
 	return func(ctx *RequestContext) string {
 		remoteIPHeaders := opts.RemoteIPHeaders
-		trustedProxies := opts.TrustedProxies
+		trustedCIDRs := opts.TrustedCIDRs
 
 		// 优先级 1：尝试 net.Conn.RemoteAddr 作为客户端 IP
-		remoteIP, _, err := net.SplitHostPort(strings.TrimSpace(ctx.RemoteAddr().String()))
+		remoteIPStr, _, err := net.SplitHostPort(strings.TrimSpace(ctx.RemoteAddr().String()))
 		if err != nil {
 			return ""
 		}
 
+		remoteIP := net.ParseIP(remoteIPStr)
+		if remoteIP == nil {
+			return ""
+		}
+
 		// 优先级 2：若上述IP是可信代理，则需继续追查。
-		trusted := isTrustedProxy(trustedProxies, remoteIP)
+		trusted := isTrustedProxy(trustedCIDRs, remoteIP)
+
 		if trusted {
 			// 按配置的远程IP标头顺序，逐个检查是否为有效的客户端IP
 			for _, headerName := range remoteIPHeaders {
-				ip, valid := validateHeader(trustedProxies, ctx.Request.Header.Get(headerName))
+				ip, valid := validateHeader(trustedCIDRs, ctx.Request.Header.Get(headerName))
 				if valid {
 					return ip
 				}
@@ -1147,20 +1165,30 @@ func ClientIPWithOption(opts ClientIPOptions) ClientIP {
 		}
 
 		// 若该远程IP不是可信代理，则作为客户端IP
-		return remoteIP
+		return remoteIPStr
 	}
 }
 
-// 按逗号分割后逆序检查IP，若非可信代理则作为客户端 IP。
-//
-// 注意：
-//   - 若 ip 解析失败则跳过
-//   - 若查不到则返回空白 ("", false)
-func validateHeader(trustedProxies map[string]bool, ips string) (clientIP string, valid bool) {
-	if ips == "" {
+// isTrustedProxy 基于 trustedCIDRs 检查 IP 地址是否包含在受信任的列表中。
+func isTrustedProxy(trustedCIDRs []*net.IPNet, remoteIP net.IP) bool {
+	if trustedCIDRs == nil {
+		return false
+	}
+
+	for _, cidr := range trustedCIDRs {
+		if cidr.Contains(remoteIP) {
+			return true
+		}
+	}
+	return false
+}
+
+// validateHeader 将解析 X-Real-IP 和 X-Forwarded-For 标头，并返回初始客户端 IP 地址或不受信任的 IP 地址。
+func validateHeader(trustedCIDRs []*net.IPNet, header string) (clientIP string, valid bool) {
+	if header == "" {
 		return "", false
 	}
-	items := strings.Split(ips, ",")
+	items := strings.Split(header, ",")
 	for i := len(items) - 1; i >= 0; i-- {
 		ipStr := strings.TrimSpace(items[i])
 		ip := net.ParseIP(ipStr)
@@ -1169,15 +1197,10 @@ func validateHeader(trustedProxies map[string]bool, ips string) (clientIP string
 		}
 
 		// X-Forwarded-For 由代理追加
-		// 逆序检查IP，若非可信代理则作为客户端IP
-		if (i == 0) || (!isTrustedProxy(trustedProxies, ipStr)) {
+		// 反向检查 IP 地址，直到找到不受信任的代理为止。
+		if (i == 0) || (!isTrustedProxy(trustedCIDRs, ip)) {
 			return ipStr, true
 		}
 	}
 	return "", false
-}
-
-// 基于可信代理判断给定的 IP 地址是否可信。
-func isTrustedProxy(trustedProxies map[string]bool, remoteIP string) bool {
-	return trustedProxies[remoteIP]
 }

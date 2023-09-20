@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"io"
 	"testing"
 
 	"github.com/favbox/wind/network"
@@ -21,6 +22,23 @@ func TestIOUtilCopyBuffer(t *testing.T) {
 	assert.Equal(t, written, srcLen)
 	assert.Equal(t, err, nil)
 	assert.Equal(t, []byte(str), writeBuffer.Bytes())
+
+	// 测试无数据可读的情况
+	writeBuffer.Reset()
+	emptySrc := bytes.NewBufferString("")
+	written, err = CopyBuffer(dst, emptySrc, buf)
+	assert.Equal(t, written, int64(0))
+	assert.Nil(t, err)
+	assert.Equal(t, []byte(""), writeBuffer.Bytes())
+
+	// 测试一个 LimitedReader
+	writeBuffer.Reset()
+	limit := int64(5)
+	limitedSrc := io.LimitedReader{R: bytes.NewBufferString(str), N: limit}
+	written, err = CopyBuffer(dst, &limitedSrc, buf)
+	assert.Equal(t, written, limit)
+	assert.Nil(t, err)
+	assert.Equal(t, []byte(str[:limit]), writeBuffer.Bytes())
 }
 
 func TestIOUtilCopyBufferWithNilBuffer(t *testing.T) {
@@ -48,6 +66,14 @@ func TestIoutilCopyZeroAlloc(t *testing.T) {
 	assert.Equal(t, written, srcLen)
 	assert.Equal(t, err, nil)
 	assert.Equal(t, []byte(str), writeBuffer.Bytes())
+
+	// 测试无可读数据的情况
+	writeBuffer.Reset()
+	emptySrc := bytes.NewBufferString("")
+	written, err = CopyZeroAlloc(dst, emptySrc)
+	assert.Nil(t, err)
+	assert.Equal(t, written, int64(0))
+	assert.Equal(t, []byte(""), writeBuffer.Bytes())
 }
 
 func BenchmarkCopyZeroAlloc(b *testing.B) {

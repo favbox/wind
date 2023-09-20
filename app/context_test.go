@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"reflect"
 	"strings"
 	"testing"
@@ -28,47 +29,66 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRequestContext_ClientIP(t *testing.T) {
+type MockIpConn struct {
+	*mock.Conn
+	RemoteIp string
+	Port     int
+}
+
+func (c *MockIpConn) RemoteAddr() net.Addr {
+	return &net.UDPAddr{
+		IP:   net.ParseIP(c.RemoteIp),
+		Port: c.Port,
+	}
+}
+
+func newContextClientIPTest() *RequestContext {
 	c := NewContext(0)
-	c.conn = mock.NewConn("")
+	c.conn = &MockIpConn{
+		Conn:     mock.NewConn(""),
+		RemoteIp: "127.0.0.1",
+		Port:     8080,
+	}
+	c.Request.Header.Set("X-Real-IP", " 10.10.10.10  ")
+	c.Request.Header.Set("X-Forwarded-For", "  20.20.20.20, 30.30.30.30")
+	return c
+}
 
-	// 0.0.0.0 模拟可信代理服务器
-	c.Request.Header.Set("X-Forwarded-For", "126.0.0.2, 0.0.0.0")
-	ip := c.ClientIP()
-	assert.Equal(t, "126.0.0.2", ip)
+func TestClientIp(t *testing.T) {
+	c := newContextClientIPTest()
+	// 默认的 X-Forwarded-For 和 X-Real-IP 行为
+	assert.Equal(t, "20.20.20.20", c.ClientIP())
 
-	// 无代理服务器
-	c = NewContext(0)
-	c.conn = mock.NewConn("")
-	c.Request.Header.Set("X-Real-Ip", "126.0.0.1")
-	ip = c.ClientIP()
-	assert.Equal(t, "126.0.0.1", ip)
+	c.Request.Header.Del("X-Forwarded-For")
+	assert.Equal(t, "10.10.10.10", c.ClientIP())
 
-	// 自定义 RemoteIPHeaders 和 TrustedProxies
+	c.Request.Header.Set("X-Forwarded-For", "30.30.30.30  ")
+	assert.Equal(t, "30.30.30.30", c.ClientIP())
+
+	// No trusted CIDRS
+	c = newContextClientIPTest()
 	opts := ClientIPOptions{
 		RemoteIPHeaders: []string{"X-Forwarded-For", "X-Real-IP"},
-		TrustedProxies: map[string]bool{
-			"0.0.0.0": true,
-		},
+		TrustedCIDRs:    nil,
 	}
-	c = NewContext(0)
 	c.SetClientIPFunc(ClientIPWithOption(opts))
-	c.conn = mock.NewConn("")
-	c.Request.Header.Set("X-Forwarded-For", " 126.0.0.2, 0.0.0.0")
-	ip = c.ClientIP()
-	assert.Equal(t, "126.0.0.2", ip)
+	assert.Equal(t, "127.0.0.1", c.ClientIP())
 
-	// 无可信的代理服务器
+	_, cidr, _ := net.ParseCIDR("30.30.30.30/32")
 	opts = ClientIPOptions{
 		RemoteIPHeaders: []string{"X-Forwarded-For", "X-Real-IP"},
-		TrustedProxies:  nil,
+		TrustedCIDRs:    []*net.IPNet{cidr},
 	}
-	c = NewContext(0)
 	c.SetClientIPFunc(ClientIPWithOption(opts))
-	c.conn = mock.NewConn("")
-	c.Request.Header.Set("X-Forwarded-For", " 126.0.0.2, 0.0.0.0")
-	ip = c.ClientIP()
-	assert.Equal(t, "0.0.0.0", ip)
+	assert.Equal(t, "127.0.0.1", c.ClientIP())
+
+	_, cidr, _ = net.ParseCIDR("127.0.0.1/32")
+	opts = ClientIPOptions{
+		RemoteIPHeaders: []string{"X-Forwarded-For", "X-Real-IP"},
+		TrustedCIDRs:    []*net.IPNet{cidr},
+	}
+	c.SetClientIPFunc(ClientIPWithOption(opts))
+	assert.Equal(t, "30.30.30.30", c.ClientIP())
 }
 
 func TestRequestContext_SetClientIPFunc(t *testing.T) {

@@ -54,4 +54,9 @@ func TestCleanPath(t *testing.T) {
 	expectedMultiSlashPath := "/Foo/Bar/go/src/github.com"
 	cleanMultiSlashPath := CleanPath(multiSlashPath)
 	assert.Equal(t, expectedMultiSlashPath, cleanMultiSlashPath)
+
+	inputPath := "/Foo/Bar/go/src/github.com/favbox/wind/common/utils/path_test.go/."
+	expectedPath := "/Foo/Bar/go/src/github.com/favbox/wind/common/utils/path_test.go/"
+	cleanedPath := CleanPath(inputPath)
+	assert.Equal(t, expectedPath, cleanedPath)
 }
