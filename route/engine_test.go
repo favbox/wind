@@ -467,3 +467,11 @@ func assertRoutePresent(t *testing.T, gets Routes, want Route) {
 func handlerTest1(c context.Context, ctx *app.RequestContext) {}
 
 func handlerTest2(c context.Context, ctx *app.RequestContext) {}
+
+func TestSetEngineRun(t *testing.T) {
+	e := NewEngine(config.NewOptions(nil))
+	e.Init()
+	assert.True(t, !e.IsRunning())
+	e.MarkAsRunning()
+	assert.True(t, e.IsRunning())
+}

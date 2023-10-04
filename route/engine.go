@@ -225,9 +225,9 @@ func (engine *Engine) Run() (err error) {
 		return err
 	}
 
-	// 切换引擎状态至运行中
-	if !atomic.CompareAndSwapUint32(&engine.status, statusInitialized, statusRunning) {
-		return errAlreadyRunning
+	// 切换引擎状态为运行中
+	if err = engine.MarkAsRunning(); err != nil {
+		return err
 	}
 
 	// 返回监听服务出错后，切换引擎转改至已关闭
@@ -253,6 +253,15 @@ func (engine *Engine) Run() (err error) {
 	})
 
 	return
+}
+
+// MarkAsRunning 将引擎状态设为“运行中”。
+// 警告：除非你知道自己在做什么，否则勿用此法。
+func (engine *Engine) MarkAsRunning() error {
+	if !atomic.CompareAndSwapUint32(&engine.status, statusInitialized, statusRunning) {
+		return errAlreadyRunning
+	}
+	return nil
 }
 
 // Init 初始化可用协议。 默认内置 HTTP1 协议服务器。
