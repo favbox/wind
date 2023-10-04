@@ -2137,7 +2137,7 @@ func TestClientHostClientConfigHookError(t *testing.T) {
 	request.SetMethod(consts.MethodGet)
 	request.SetRequestURI("http://foo.bar/")
 	response := protocol.AcquireResponse()
-	err := client.do(context.Background(), request, response)
+	err := client.do(context.TODO(), request, response)
 	assert.Equal(t, "模拟钩子返回错误", err.Error())
 }
 

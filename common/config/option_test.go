@@ -37,6 +37,7 @@ func TestDefaultOptions(t *testing.T) {
 	assert.Equal(t, []any{}, options.Tracers)
 	assert.Equal(t, new(any), options.TraceLevel)
 	assert.Equal(t, registry.NoopRegistry, options.Registry)
+	assert.False(t, options.DisableHeaderNamesNormalizing)
 }
 
 // TestApplyCustomOptions 初始化后使用自定义值测试配置项应用函数

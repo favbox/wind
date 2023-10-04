@@ -106,6 +106,20 @@ type Options struct {
 	// HTML 模板自动重载时间间隔。
 	// 默认为0，即根据文件变更事件立即重载。
 	AutoReloadInterval time.Duration
+
+	// 若设置该选项，则标头名称将原样传递而不用规范化。
+	// 禁用标头名称的规范化，可能仅对其他客户端的代理响应有用。
+	//
+	// 默认值：false
+	//
+	// 默认情况下，请求和响应的标头名称均会规范化，即：
+	// 第一个字母和分隔符'-'后面的第一个字母会被转为大写，其他字母会被转为小写。
+	// 示例：
+	//
+	//	* HOST -> Host
+	//	* content-type -> Content-Type
+	//	* cONTENT-lenGTH -> Content-Length
+	DisableHeaderNamesNormalizing bool
 }
 
 // Apply 将指定的一组配置方法 opts 应用到配置项上。
@@ -118,21 +132,22 @@ func (o *Options) Apply(opts []Option) {
 // NewOptions 创建基于给定配置函数的配置项。
 func NewOptions(opts []Option) *Options {
 	options := &Options{
-		KeepAliveTimeout:      defaultKeepAliveTimeout,
-		ReadTimeout:           defaultReadTimeout,
-		IdleTimeout:           defaultReadTimeout,
-		RedirectTrailingSlash: true,
-		UnescapePathValues:    true,
-		Network:               defaultNetwork,
-		Addr:                  defaultAddr,
-		BasePath:              defaultBasePath,
-		MaxRequestBodySize:    defaultMaxRequestBodySize,
-		MaxKeepBodySize:       defaultMaxRequestBodySize,
-		ExitWaitTimeout:       defaultWaitExitTimeout,
-		ReadBufferSize:        defaultReadBufferSize,
-		Tracers:               []any{},
-		TraceLevel:            new(any),
-		Registry:              registry.NoopRegistry,
+		KeepAliveTimeout:              defaultKeepAliveTimeout,
+		ReadTimeout:                   defaultReadTimeout,
+		IdleTimeout:                   defaultReadTimeout,
+		RedirectTrailingSlash:         true,
+		UnescapePathValues:            true,
+		Network:                       defaultNetwork,
+		Addr:                          defaultAddr,
+		BasePath:                      defaultBasePath,
+		MaxRequestBodySize:            defaultMaxRequestBodySize,
+		MaxKeepBodySize:               defaultMaxRequestBodySize,
+		ExitWaitTimeout:               defaultWaitExitTimeout,
+		ReadBufferSize:                defaultReadBufferSize,
+		Tracers:                       []any{},
+		TraceLevel:                    new(any),
+		Registry:                      registry.NoopRegistry,
+		DisableHeaderNamesNormalizing: false,
 	}
 	options.Apply(opts)
 	return options

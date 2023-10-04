@@ -46,6 +46,7 @@ func TestOptions(t *testing.T) {
 		WithTraceLevel(stats.LevelDisabled),
 		WithRegistry(nil, info),
 		WithAutoReloadRender(true, 5*time.Second),
+		WithDisableHeaderNamesNormalizing(true),
 	})
 
 	assert.Equal(t, opt.ReadTimeout, time.Second)
@@ -77,6 +78,7 @@ func TestOptions(t *testing.T) {
 	assert.Equal(t, opt.Registry, nil)
 	assert.Equal(t, opt.AutoReloadRender, true)
 	assert.Equal(t, opt.AutoReloadInterval, 5*time.Second)
+	assert.True(t, opt.DisableHeaderNamesNormalizing)
 }
 
 func TestDefaultOptions(t *testing.T) {
@@ -109,4 +111,5 @@ func TestDefaultOptions(t *testing.T) {
 	assert.Nil(t, opt.RegistryInfo)
 	assert.Equal(t, opt.AutoReloadRender, false)
 	assert.Equal(t, opt.AutoReloadInterval, time.Duration(0))
+	assert.False(t, opt.DisableHeaderNamesNormalizing)
 }

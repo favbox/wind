@@ -260,7 +260,7 @@ func (h *RequestHeader) DelCookie(key string) {
 	h.cookies = delAllArgs(h.cookies, key)
 }
 
-// DisableNormalizing 禁用标头名称的规范化。
+// DisableNormalizing 禁用请求标头名称的规范化。
 //
 // 默认情况下，第一个字母和所有破折号后面的第一个字母会大写，其他字母小写。
 // 例如：
@@ -272,6 +272,7 @@ func (h *RequestHeader) DelCookie(key string) {
 // 如非必要，不要禁用标头名称的规范化。
 func (h *RequestHeader) DisableNormalizing() {
 	h.disableNormalizing = true
+	h.Trailer().DisableNormalizing()
 }
 
 // FullCookie 返回完整的 cookie 字节切片。
@@ -349,7 +350,7 @@ func (h *RequestHeader) InitContentLengthWithValue(contentLength int) {
 	h.contentLength = contentLength
 }
 
-// IsDisableNormalizing 返回是否禁用了标头名称的规范化。
+// IsDisableNormalizing 返回是否禁用了响应标头名称的规范化。
 func (h *RequestHeader) IsDisableNormalizing() bool {
 	return h.disableNormalizing
 }
@@ -1169,7 +1170,7 @@ func (h *ResponseHeader) DelCookieBytes(key []byte) {
 	h.cookies = delAllArgs(h.cookies, bytesconv.B2s(key))
 }
 
-// DisableNormalizing 禁用标头名称的规范化。
+// DisableNormalizing 禁用响应标头名称的规范化。
 //
 // 默认情况下，第一个字母和所有破折号后面的第一个字母会大写，其他字母小写。
 // 例如：
@@ -1181,6 +1182,7 @@ func (h *ResponseHeader) DelCookieBytes(key []byte) {
 // 如非必要，不要禁用标头名称的规范化。
 func (h *ResponseHeader) DisableNormalizing() {
 	h.disableNormalizing = true
+	h.Trailer().DisableNormalizing()
 }
 
 // FullCookie 返回完整的 Cookie 字节切片。

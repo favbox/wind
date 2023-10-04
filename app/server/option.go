@@ -321,3 +321,10 @@ func WithOnConnect(fn func(ctx context.Context, conn network.Conn) context.Conte
 		o.OnConnect = fn
 	}}
 }
+
+// WithDisableHeaderNamesNormalizing 用于设置是否禁用标头名称的规范化。
+func WithDisableHeaderNamesNormalizing(disable bool) config.Option {
+	return config.Option{F: func(o *config.Options) {
+		o.DisableHeaderNamesNormalizing = disable
+	}}
+}

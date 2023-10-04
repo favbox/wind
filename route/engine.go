@@ -708,9 +708,7 @@ func (engine *Engine) alpnEnable() bool {
 	return engine.options.TLS != nil && engine.options.ALPN
 }
 
-// 分配一个新的请求上下文。
-//
-// 设定了正文的最大保留字节数、获取客户端 IP 和表单值的自定义函数。
+// 分配一个新的请求上下文，并设定最大保留字节数、获取客户端 IP 和表单值的自定义函数。
 func (engine *Engine) allocateContext() *app.RequestContext {
 	ctx := engine.NewContext()
 	ctx.Request.SetMaxKeepBodySize(engine.options.MaxKeepBodySize)
@@ -816,20 +814,21 @@ func (engine *Engine) executeOnShutdownHooks(ctx context.Context, ch chan struct
 
 func newHttp1OptionFromEngine(engine *Engine) *http1.Option {
 	opt := &http1.Option{
-		StreamRequestBody:            engine.options.StreamRequestBody,
-		GetOnly:                      engine.options.GetOnly,
-		DisablePreParseMultipartForm: engine.options.DisablePreParseMultipartForm,
-		DisableKeepalive:             engine.options.DisableKeepalive,
-		NoDefaultServerHeader:        engine.options.NoDefaultServerHeader,
-		MaxRequestBodySize:           engine.options.MaxRequestBodySize,
-		IdleTimeout:                  engine.options.IdleTimeout,
-		ReadTimeout:                  engine.options.ReadTimeout,
-		ServerName:                   engine.GetServerName(),
-		TLS:                          engine.options.TLS,
-		EnableTrace:                  engine.IsTraceEnable(),
-		HTMLRender:                   engine.htmlRender,
-		ContinueHandler:              engine.ContinueHandler,
-		HijackConnHandle:             engine.HijackConnHandle,
+		StreamRequestBody:             engine.options.StreamRequestBody,
+		GetOnly:                       engine.options.GetOnly,
+		DisablePreParseMultipartForm:  engine.options.DisablePreParseMultipartForm,
+		DisableKeepalive:              engine.options.DisableKeepalive,
+		NoDefaultServerHeader:         engine.options.NoDefaultServerHeader,
+		MaxRequestBodySize:            engine.options.MaxRequestBodySize,
+		IdleTimeout:                   engine.options.IdleTimeout,
+		ReadTimeout:                   engine.options.ReadTimeout,
+		ServerName:                    engine.GetServerName(),
+		TLS:                           engine.options.TLS,
+		EnableTrace:                   engine.IsTraceEnable(),
+		HTMLRender:                    engine.htmlRender,
+		ContinueHandler:               engine.ContinueHandler,
+		HijackConnHandle:              engine.HijackConnHandle,
+		DisableHeaderNamesNormalizing: engine.options.DisableHeaderNamesNormalizing,
 	}
 	// 标准库的空闲超时必不能为零，若为 0 则置为 -1。
 	// 由于网络库的触发方式不同，具体原因请参阅该值的实际使用情况。
