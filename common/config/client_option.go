@@ -125,6 +125,10 @@ type ClientOptions struct {
 
 	// 观察间隔时长
 	ObservationInterval time.Duration
+
+	// 重配主机客户端的回调钩子。
+	// 若出错，则请求将被终止。
+	HostClientConfigHook func(hc any) error
 }
 
 func (o *ClientOptions) Apply(opts []ClientOption) {

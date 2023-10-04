@@ -458,6 +458,16 @@ func (c *Client) do(ctx context.Context, req *protocol.Request, resp *protocol.R
 			ProxyURI: proxyURI,
 			IsTLS:    isTLS,
 		})
+
+		// 重配钩子
+		if c.options.HostClientConfigHook != nil {
+			err = c.options.HostClientConfigHook(hc)
+			if err != nil {
+				c.mLock.Unlock()
+				return err
+			}
+		}
+
 		m[h] = hc
 		if len(m) == 1 {
 			startCleaner = true

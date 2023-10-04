@@ -94,6 +94,13 @@ func WithResponseBodyStream(b bool) config.ClientOption {
 	}}
 }
 
+// WithHostClientConfigHook 用于重配主机客户端的回调钩子。
+func WithHostClientConfigHook(h func(hc any) error) config.ClientOption {
+	return config.ClientOption{F: func(o *config.ClientOptions) {
+		o.HostClientConfigHook = h
+	}}
+}
+
 // WithDisableHeaderNamesNormalizing 设置是否禁用标头名称的规范化。
 func WithDisableHeaderNamesNormalizing(disable bool) config.ClientOption {
 	return config.ClientOption{F: func(o *config.ClientOptions) {

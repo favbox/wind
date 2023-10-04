@@ -2125,6 +2125,48 @@ func TestClientRetry(t *testing.T) {
 	}
 }
 
+func TestClientHostClientConfigHookError(t *testing.T) {
+	client, _ := NewClient(WithHostClientConfigHook(func(hc any) error {
+		cli, ok := hc.(*http1.HostClient)
+		assert.True(t, ok)
+		assert.Equal(t, "foo.bar:80", cli.Addr)
+		return errors.New("模拟钩子返回错误")
+	}))
+
+	request := protocol.AcquireRequest()
+	request.SetMethod(consts.MethodGet)
+	request.SetRequestURI("http://foo.bar/")
+	response := protocol.AcquireResponse()
+	err := client.do(context.Background(), request, response)
+	assert.Equal(t, "模拟钩子返回错误", err.Error())
+}
+
+func TestClientHostClientConfigHook(t *testing.T) {
+	client, _ := NewClient(WithHostClientConfigHook(func(hc any) error {
+		cli, ok := hc.(*http1.HostClient)
+		assert.True(t, ok)
+		assert.Equal(t, "foo.bar:80", cli.Addr)
+		cli.Addr = "FOO.BAR:443"
+		return nil
+	}))
+
+	request := protocol.AcquireRequest()
+	response := protocol.AcquireResponse()
+	defer func() {
+		protocol.ReleaseRequest(request)
+		protocol.ReleaseResponse(response)
+	}()
+	request.SetMethod(consts.MethodGet)
+	request.SetRequestURI("http://foo.bar/")
+	client.do(context.Background(), request, response)
+	client.mLock.Lock()
+	hc := client.m["foo.bar"]
+	client.mLock.Unlock()
+	hcr, ok := hc.(*http1.HostClient)
+	assert.True(t, ok)
+	assert.Equal(t, "FOO.BAR:443", hcr.Addr)
+}
+
 func TestClientDialerName(t *testing.T) {
 	client, _ := NewClient()
 	dName, err := client.GetDialerName()
