@@ -52,8 +52,8 @@ func GetFieldValue(refValue reflect.Value, parentIndex []int) reflect.Value {
 	// 为了防止父结构体也是空指针，需要创建一个非空 reflect.Value
 	for refValue.Kind() == reflect.Ptr {
 		if refValue.IsNil() {
-			nonNilvalue, ptrDepth := GetNonNilReferenceValue(refValue)
-			refValue.Set(ReferenceValue(nonNilvalue, ptrDepth))
+			nonNilVal, ptrDepth := GetNonNilReferenceValue(refValue)
+			refValue.Set(ReferenceValue(nonNilVal, ptrDepth))
 		}
 		refValue = refValue.Elem()
 	}

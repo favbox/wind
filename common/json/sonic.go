@@ -9,11 +9,11 @@ const Name = "sonic"
 
 var (
 	json = sonic.ConfigStd
-	// Marshal 用于渲染 JSON 而导出的标库准实现。
+	// Marshal 用于 JSON 编码而导出的 sonic 实现。
 	Marshal = json.Marshal
-	// Unmarshal 用于绑定 JSON 而导出的标准库实现。
+	// Unmarshal 用于 JSON 解码而导出的 sonic 实现。
 	Unmarshal = json.Unmarshal
-	// MarshalIndent 用于渲染带缩进格式的 JSON 而导出的标准库实现。
+	// MarshalIndent 用于编码为带缩进格式的 JSON 而导出的 sonic 实现。
 	MarshalIndent = json.MarshalIndent
 	// NewDecoder 用于读取 io.Reader 而导出的 JSON 读取器。
 	NewDecoder = json.NewDecoder

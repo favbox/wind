@@ -8,7 +8,7 @@ import (
 type Binder interface {
 	Name() string
 	Bind(*protocol.Request, any, param.Params) error
-	BindAndValidate(*protocol.Request, param.Params) error
+	BindAndValidate(*protocol.Request, any, param.Params) error
 	BindPath(*protocol.Request, any, param.Params) error
 	BindQuery(*protocol.Request, any) error
 	BindHeader(*protocol.Request, any) error
