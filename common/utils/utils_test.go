@@ -84,3 +84,9 @@ func TestNextLine(t *testing.T) {
 	_, _, sErr = NextLine(singleHeaderStr)
 	assert.EqualValues(t, errNeedMore, sErr)
 }
+
+func TestFilterContentType(t *testing.T) {
+	contentType := "text/plain; charset=utf-8"
+	contentType = FilterContentType(contentType)
+	assert.Equal(t, "text/plain", contentType)
+}

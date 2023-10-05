@@ -82,6 +82,10 @@ type Options struct {
 	TraceLevel                   any   // 跟踪级别，默认 stats.LevelDetailed
 	ListenConfig                 *net.ListenConfig
 
+	BindConfig      any
+	CustomBinder    any
+	CustomValidator any
+
 	// TransporterNewer 是传输器的自定义创建函数。
 	TransporterNewer func(opt *Options) network.Transporter
 	// AltTransporterNewer 是替补的传输器自定义创建函数。

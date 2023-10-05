@@ -104,6 +104,7 @@ const (
 	MIMETextCss               = "text/css"
 	MIMETextJavascript        = "text/javascript"
 	MIMETextEventStream       = "text/event-stream"
+	MIMEMultipartPOSTForm     = "multipart/form-data"
 )
 
 // 应用类 MIME
@@ -131,6 +132,7 @@ const (
 	MIMEApplicationOpenXMLWord  = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 	MIMEApplicationOpenXMLExcel = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 	MIMEApplicationOpenXMLPPT   = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+	MIMEPROTOBUF                = "application/x-protobuf"
 )
 
 // 图片类 MIME
