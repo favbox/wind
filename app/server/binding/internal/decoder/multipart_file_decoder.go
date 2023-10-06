@@ -106,7 +106,7 @@ func (d *fileTypeDecoder) fileSliceDecode(req *protocol.Request, _ param.Params,
 		field = reflect.MakeSlice(field.Type(), len(files), len(files))
 	}
 
-	// 处理多个指针
+	// 处理多个*的指针
 	var ptrDepth int
 	t := d.fieldType.Elem()
 	elemKind := t.Kind()
@@ -119,7 +119,7 @@ func (d *fileTypeDecoder) fileSliceDecode(req *protocol.Request, _ param.Params,
 	for idx, file := range files {
 		v := reflect.New(t).Elem()
 		v.Set(reflect.ValueOf(*file))
-		field.Index(idx).Set(ReferenceValue(field, parentPtrDepth))
+		field.Index(idx).Set(ReferenceValue(v, ptrDepth))
 	}
 	fieldValue.Field(d.index).Set(ReferenceValue(field, parentPtrDepth))
 

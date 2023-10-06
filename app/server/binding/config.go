@@ -40,7 +40,7 @@ type BindConfig struct {
 
 	// 是否允许 JSON 解码器调用 UseNumber 方法。
 	//
-	// 意为：解码器是否可将数字解析为 Number 类型而非 float64。
+	// 意为：开启后，解码器会将 float64 解析为 json.Number。
 	// 用于 BindJSON()。
 	//
 	// 默认值：false，即不使用 Number，保持 float64。
@@ -48,7 +48,7 @@ type BindConfig struct {
 
 	// 是否允许 JSON 解码器调用 DisallowUnknownFields 方法。
 	//
-	// 意为：当目标是结构体而输入与目标中非忽略的导出字段不匹配时，解码器是否返回错误。
+	// 意为：开启后，若解码后的字段不是目标结构体定义的就报错。
 	// 用于 BindJSON()。
 	//
 	// 默认值：false，即不禁用未知字段。

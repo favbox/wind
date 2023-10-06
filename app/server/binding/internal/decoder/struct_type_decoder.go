@@ -64,7 +64,7 @@ func (d *structTypeFieldTextDecoder) Decode(req *protocol.Request, params param.
 		var vv reflect.Value
 		vv, err := stringToValue(t, text, req, params, d.config)
 		if err != nil {
-			wlog.Infof("无法解码 '%s' 为 %s：%w，但可能不影响正确性，故跳过", text, d.fieldType.Name(), err)
+			wlog.Infof("无法解码 '%s' 为 %s：%v，但可能不影响正确性，故跳过", text, d.fieldType.Name(), err)
 			return nil
 		}
 		field.Set(ReferenceValue(vv, ptrDepth))
@@ -73,7 +73,7 @@ func (d *structTypeFieldTextDecoder) Decode(req *protocol.Request, params param.
 
 	err = wjson.Unmarshal(bytesconv.S2b(text), field.Addr().Interface())
 	if err != nil {
-		wlog.Infof("无法解码 '%s' 为 %s：%w，但可能不影响正确性，故跳过", text, d.fieldType.Name(), err)
+		wlog.Infof("无法解码 '%s' 为 %s：%v，但可能不影响正确性，故跳过", text, d.fieldType.Name(), err)
 	}
 
 	return nil

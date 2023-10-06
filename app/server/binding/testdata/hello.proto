@@ -1,0 +1,7 @@
+syntax = "proto3";
+package wind;
+option go_package = "wind/hello";
+
+message WindReq {
+  string Name = 1;
+}

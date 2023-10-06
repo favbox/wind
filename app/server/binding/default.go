@@ -180,9 +180,13 @@ func (b *defaultBinder) bindTag(req *protocol.Request, v any, params param.Param
 
 func (b *defaultBinder) bindTagAndValidate(req *protocol.Request, v any, params param.Params, tag string) error {
 	rv, typeID := valueAndTypeID(v)
+
+	// 确保接收器为非空指针
 	if err := checkPointer(rv); err != nil {
 		return err
 	}
+
+	// 将接收器
 	rt := dereferPointer(rv)
 	if rt.Kind() != reflect.Struct {
 		return b.bindNonStruct(req, v)
