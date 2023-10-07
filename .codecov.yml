@@ -2,4 +2,3 @@ ignore:
   - "images/.*"
   - "examples/.*"
   - "cmd/.*"
-l
