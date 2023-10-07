@@ -12,12 +12,15 @@ import (
 	"time"
 
 	"github.com/favbox/wind/app"
+	"github.com/favbox/wind/app/server/binding"
 	"github.com/favbox/wind/common/config"
 	errs "github.com/favbox/wind/common/errors"
 	"github.com/favbox/wind/common/mock"
 	"github.com/favbox/wind/network"
 	"github.com/favbox/wind/network/standard"
+	"github.com/favbox/wind/protocol"
 	"github.com/favbox/wind/protocol/consts"
+	"github.com/favbox/wind/route/param"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -474,4 +477,79 @@ func TestSetEngineRun(t *testing.T) {
 	assert.True(t, !e.IsRunning())
 	e.MarkAsRunning()
 	assert.True(t, e.IsRunning())
+}
+
+type mockBinder struct{}
+
+func (m *mockBinder) Name() string {
+	return "test binder"
+}
+
+func (m *mockBinder) Bind(request *protocol.Request, i interface{}, params param.Params) error {
+	return nil
+}
+
+func (m *mockBinder) BindAndValidate(request *protocol.Request, i interface{}, params param.Params) error {
+	return nil
+}
+
+func (m *mockBinder) BindQuery(request *protocol.Request, i interface{}) error {
+	return nil
+}
+
+func (m *mockBinder) BindHeader(request *protocol.Request, i interface{}) error {
+	return nil
+}
+
+func (m *mockBinder) BindPath(request *protocol.Request, i interface{}, params param.Params) error {
+	return nil
+}
+
+func (m *mockBinder) BindForm(request *protocol.Request, i interface{}) error {
+	return nil
+}
+
+func (m *mockBinder) BindJSON(request *protocol.Request, i interface{}) error {
+	return nil
+}
+
+func (m *mockBinder) BindProtobuf(request *protocol.Request, i interface{}) error {
+	return nil
+}
+
+type mockValidator struct{}
+
+func (m *mockValidator) ValidateStruct(interface{}) error {
+	return fmt.Errorf("test mock")
+}
+
+func (m *mockValidator) Engine() interface{} {
+	return nil
+}
+
+func (m *mockValidator) ValidateTag() string {
+	return "vd"
+}
+
+type mockNonValidator struct{}
+
+func (m *mockNonValidator) ValidateStruct(interface{}) error {
+	return fmt.Errorf("test mock")
+}
+
+func TestInitBinderAndValidator(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			t.Errorf("意外的恐慌，%v", r)
+		}
+	}()
+	opt := config.NewOptions([]config.Option{})
+	bindConfig := binding.NewBindConfig()
+	bindConfig.LooseZeroMode = true
+	opt.BindConfig = bindConfig
+	binder := &mockBinder{}
+	opt.CustomBinder = binder
+	validator := &mockValidator{}
+	opt.CustomValidator = validator
+	NewEngine(opt)
 }

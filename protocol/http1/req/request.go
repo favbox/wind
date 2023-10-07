@@ -59,7 +59,7 @@ func ReadBodyStream(req *protocol.Request, zr network.Reader, maxBodySize int, g
 	return ContinueReadBodyStream(req, zr, maxBodySize, preParseMultipartForm)
 }
 
-// ContinueReadBodyStream 如果请求标头包含“Expect:100 continue”，则读取流中的请求正文。
+// ContinueReadBodyStream 如果请求标头包含“Expect:100 continue”，则读取流中的请求体。
 func ContinueReadBodyStream(req *protocol.Request, zr network.Reader, maxBodySize int, preParseMultipartForm ...bool) error {
 	var err error
 	contentLength := req.Header.ContentLength()
@@ -82,7 +82,7 @@ func ContinueReadBodyStream(req *protocol.Request, zr network.Reader, maxBodySiz
 	if contentLength == -2 {
 		// 不忽略正文的请求（非 GET、HEAD），则设置内容长度。
 		// 标识主体对 http 请求没有意义，因为主体的末尾是由连接关闭决定的。
-		// 所以，对于没有 'Content-Length' 和 'Transfer-Encoding' 标头的请求来说，只需忽略请求正文即可。
+		// 所以，对于没有 'Content-Length' 和 'Transfer-Encoding' 标头的请求来说，只需忽略请求体即可。
 
 		// 参见 https://tools.ietf.org/html/rfc7230#section-3.3.2
 		if !req.Header.IgnoreBody() {
@@ -120,7 +120,7 @@ func ContinueReadBodyStream(req *protocol.Request, zr network.Reader, maxBodySiz
 // 如果 MayContinue 返回 true，则调用者必须：
 //
 //   - 若请求标头不满足调用方的要求，则发送 StatusExpectationFailed 响应。
-//   - 或在用 ContinueReadBody 读取请求正文之前发送 StatusContinue 响应。
+//   - 或在用 ContinueReadBody 读取请求体之前发送 StatusContinue 响应。
 //   - 或关闭连接。
 //
 // 若读取标头之前请求已关闭，则返回 io.EOF。
@@ -135,7 +135,7 @@ func Read(req *protocol.Request, r network.Reader, preParse ...bool) error {
 // 如果 MayContinue 返回 true，则调用者必须：
 //
 //   - 若请求标头不满足调用方要求，则发送 StatusExpectationFailed 响应。
-//   - 或在用 ContinueReadBody 读取请求正文之前发送 StatusContinue 响应。
+//   - 或在用 ContinueReadBody 读取请求体之前发送 StatusContinue 响应。
 //   - 或关闭连接。
 //
 // 若读取标头之前请求已关闭，则返回 io.EOF。
@@ -168,7 +168,7 @@ func ReadLimitBody(req *protocol.Request, r network.Reader, maxBodySize int, get
 	return ContinueReadBody(req, r, maxBodySize, preParseMultipartForm)
 }
 
-// ContinueReadBody 如果请求标头包含“Expect:100 continue”，则读取请求正文。
+// ContinueReadBody 如果请求标头包含“Expect:100 continue”，则读取请求体。
 func ContinueReadBody(req *protocol.Request, r network.Reader, maxBodySize int, preParseMultipartForm ...bool) error {
 	var err error
 	contentLength := req.Header.ContentLength()
@@ -204,7 +204,7 @@ func ContinueReadBody(req *protocol.Request, r network.Reader, maxBodySize int, 
 	if contentLength == -2 {
 		// 不忽略正文的请求（非 GET、HEAD），则设置内容长度。
 		// 标识主体对 http 请求没有意义，因为主体的末尾是由连接关闭决定的。
-		// 所以，对于没有 'Content-Length' 和 'Transfer-Encoding' 标头的请求来说，只需忽略请求正文即可。
+		// 所以，对于没有 'Content-Length' 和 'Transfer-Encoding' 标头的请求来说，只需忽略请求体即可。
 
 		// 参见 https://tools.ietf.org/html/rfc7230#section-3.3.2
 		if !req.Header.IgnoreBody() {

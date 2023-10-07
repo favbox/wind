@@ -23,7 +23,7 @@ type Body struct {
 //
 // url 可以是标准的相对路径，也可以是绝对路径
 //
-// 若引擎 engine.IsStreamRequestBody() 可流式处理请求正文，则设置正文为 bodyStream
+// 若引擎 engine.IsStreamRequestBody() 可流式处理请求体，则设置正文为 bodyStream
 // 否则，设置正文为 bodyBytes
 //
 // 返回的 ResponseRecorder 已被刷新写入，亦即它的状态码始终被置为 200。

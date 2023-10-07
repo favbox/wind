@@ -16,6 +16,7 @@ import (
 	"sync/atomic"
 
 	"github.com/favbox/wind/app"
+	"github.com/favbox/wind/app/server/binding"
 	"github.com/favbox/wind/app/server/render"
 	"github.com/favbox/wind/common/config"
 	errs "github.com/favbox/wind/common/errors"
@@ -109,6 +110,7 @@ func NewEngine(opts *config.Options) *Engine {
 		enableTrace:           true,
 		options:               opts,
 	}
+	engine.initBinderAndValidator(opts)
 	if opts.TransporterNewer != nil {
 		engine.transport = opts.TransporterNewer(opts)
 	}
@@ -191,7 +193,7 @@ type Engine struct {
 	PanicHandler app.HandlerFunc
 
 	// 在收到 Expect 100 Continue 标头后调用 ContinueHandler。
-	// 使用该处理器，服务器可以基于头信息决定是否读取可能较大的请求正文。
+	// 使用该处理器，服务器可以基于头信息决定是否读取可能较大的请求体。
 	//
 	// 默认会自动读取请求体，就像普通请求一样。
 	ContinueHandler func(header *protocol.RequestHeader) bool
@@ -205,10 +207,11 @@ type Engine struct {
 	// OnShutdown 是引擎关闭时，并行触发的一组钩子函数。
 	OnShutdown []CtxCallback
 
-	// 自定义获取客户端 IP 的函数。
-	clientIPFunc app.ClientIP
-	// 自定义获取表单值的函数。
-	formValueFunc app.FormValueFunc
+	clientIPFunc  app.ClientIP      // 自定义获取客户端 IP 的函数。
+	formValueFunc app.FormValueFunc // 自定义获取表单值的函数。
+
+	binder    binding.Binder          // 自定义请求参数绑定器。
+	validator binding.StructValidator // 自定义请求参数验证器。
 }
 
 // NewContext 创建一个无请求/无响应信息的纯粹上下文。
@@ -426,6 +429,42 @@ func (engine *Engine) ServeStream(ctx context.Context, conn network.StreamConn) 
 	return errs.ErrNotSupportProtocol
 }
 
+func (engine *Engine) initBinderAndValidator(opt *config.Options) {
+	// 初始化请求参数验证器
+	engine.validator = binding.DefaultValidator()
+
+	// 设置自定义验证器
+	if opt.CustomValidator != nil {
+		customValidator, ok := opt.CustomValidator.(binding.StructValidator)
+		if !ok {
+			panic("自定义验证器未实现 binding.StructValidator 接口")
+		}
+		engine.validator = customValidator
+	}
+
+	// 设置自定义绑定器
+	if opt.CustomBinder != nil {
+		customBinder, ok := opt.CustomBinder.(binding.Binder)
+		if !ok {
+			panic("自定义绑定器未实现 binding.Binder 接口")
+		}
+		engine.binder = customBinder
+		return
+	}
+
+	// 初始化绑定器。由于存在 "BindAndValidate" 接口，此处需注入 Validator。
+	defaultBindConfig := binding.NewBindConfig()
+	defaultBindConfig.Validator = engine.validator
+	engine.binder = binding.NewBinder(defaultBindConfig)
+	if opt.BindConfig != nil {
+		customBindConfig, ok := opt.BindConfig.(*binding.BindConfig)
+		if !ok {
+			panic("自定义绑定配置无法转换为 binding.BindConfig")
+		}
+		engine.binder = binding.NewBinder(customBindConfig)
+	}
+}
+
 // ↓ ↓ ↓ ↓ ↓ suite.Core 接口的具体实现  ↓ ↓ ↓ ↓ ↓
 
 // IsRunning 报告引擎是否正在运行。
@@ -440,6 +479,8 @@ func (engine *Engine) GetCtxPool() *sync.Pool {
 
 // ServeHTTP 提供请求服务。在服务过程中，会自动调用用户扩展的 app.HandlerFunc。
 func (engine *Engine) ServeHTTP(c context.Context, ctx *app.RequestContext) {
+	ctx.SetBinder(engine.binder)
+	ctx.SetValidator(engine.validator)
 	if engine.PanicHandler != nil {
 		defer engine.recover(ctx)
 	}
@@ -556,7 +597,7 @@ func (engine *Engine) GetTransporterName() string {
 	return getTransporterName(engine.transport)
 }
 
-// IsStreamRequestBody 是否流式处理请求正文？
+// IsStreamRequestBody 是否流式处理请求体？
 func (engine *Engine) IsStreamRequestBody() bool {
 	return engine.options.StreamRequestBody
 }

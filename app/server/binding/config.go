@@ -56,7 +56,8 @@ type BindConfig struct {
 
 	// 注册自定义类型的解码器。
 	TypeUnmarshalFuncs map[reflect.Type]decoder.CustomizedDecodeFunc
-	Validator          StructValidator
+	// 用于 BindAndValidate() 的验证。
+	Validator StructValidator
 }
 
 // RegTypeUnmarshal 注册自定义类型解码器。

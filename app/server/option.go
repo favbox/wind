@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/favbox/wind/app/server/binding"
 	"github.com/favbox/wind/app/server/registry"
 	"github.com/favbox/wind/common/config"
 	"github.com/favbox/wind/common/tracer"
@@ -141,7 +142,7 @@ func WithDisablePreParseMultipartForm(b bool) config.Option {
 	}}
 }
 
-// WithMaxRequestBodySize 限制请求正文的最大字节数。
+// WithMaxRequestBodySize 限制请求体的最大字节数。
 // 默认值：4MB。
 func WithMaxRequestBodySize(bs int) config.Option {
 	return config.Option{F: func(o *config.Options) {
@@ -302,29 +303,48 @@ func WithDisablePrintRoute(b bool) config.Option {
 	}}
 }
 
-// WithOnAccept 设置在 netpoll 中新连接被接受但不能接收数据时的回调函数。
-// 在 go net 中，它将在转为 TLS 连接之前被调用。
-//
-// 默认值：nil。
+// WithOnAccept 设置 onAccept 函数。
+//   - 在 netpoll 中，新连接被接受但不能接收数据时的回调函数。
+//   - 在 go net 中，它将在转为 TLS 连接之前被调用。
 func WithOnAccept(fn func(conn net.Conn) context.Context) config.Option {
 	return config.Option{F: func(o *config.Options) {
 		o.OnAccept = fn
 	}}
 }
 
-// WithOnConnect 设置在 netpoll 中接收来自连接的数据。
-// 在 go net 中，它将在转为 TLS 连接之后被调用。
-//
-// 默认值：nil。
+// WithOnConnect 设置 onConnect 函数。
+//   - 它可以在 netpoll 中从连接接收数据。
+//   - 在 go net 中，它将在转为 TLS 连接之后被调用。
 func WithOnConnect(fn func(ctx context.Context, conn network.Conn) context.Context) config.Option {
 	return config.Option{F: func(o *config.Options) {
 		o.OnConnect = fn
 	}}
 }
 
-// WithDisableHeaderNamesNormalizing 用于设置是否禁用标头名称的规范化。
+// WithDisableHeaderNamesNormalizing 设置是否禁用标头名称规范化。
 func WithDisableHeaderNamesNormalizing(disable bool) config.Option {
 	return config.Option{F: func(o *config.Options) {
 		o.DisableHeaderNamesNormalizing = disable
+	}}
+}
+
+// WithBindConfig 设置请求参数绑定器的配置项。
+func WithBindConfig(bc *binding.BindConfig) config.Option {
+	return config.Option{F: func(o *config.Options) {
+		o.BindConfig = bc
+	}}
+}
+
+// WithCustomBinder 设置自定义请求参数绑定器。
+func WithCustomBinder(bc *binding.BindConfig) config.Option {
+	return config.Option{F: func(o *config.Options) {
+		o.CustomBinder = bc
+	}}
+}
+
+// WithCustomValidator 设置自定义请求参数验证器。
+func WithCustomValidator(bc *binding.BindConfig) config.Option {
+	return config.Option{F: func(o *config.Options) {
+		o.CustomValidator = bc
 	}}
 }

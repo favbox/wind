@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"net"
 	"net/http"
 	"strings"
 	"sync"
@@ -130,9 +131,7 @@ func TestLoadHTMLGlob(t *testing.T) {
 	wind.Delims("{[{", "}]}")
 	wind.LoadHTMLGlob("../../common/testdata/template/index.tmpl")
 	wind.GET("/index", func(c context.Context, ctx *app.RequestContext) {
-		ctx.HTML(consts.StatusOK, "index.tmpl", utils.H{
-			"title": "主站",
-		})
+		ctx.HTML(consts.StatusOK, "index.tmpl", utils.H{"title": "主站"})
 	})
 	go wind.Run()
 	time.Sleep(200 * time.Millisecond)
@@ -667,60 +666,58 @@ type CloseWithoutResetBuffer interface {
 	CloseNoResetBuffer() error
 }
 
-//
-//func TestOnprepare(t *testing.T) {
-//	h := New(
-//		WithHostPorts("localhost:9229"),
-//		WithOnConnect(func(ctx context.Context, conn network.Conn) context.Context {
-//			b, err := conn.Peek(3)
-//			assert.Nil(t, err)
-//			assert.Equal(t, string(b), "GET")
-//			if c, ok := conn.(CloseWithoutResetBuffer); ok {
-//				c.CloseNoResetBuffer()
-//			} else {
-//				conn.Close()
-//			}
-//			return ctx
-//		}))
-//	h.GET("/ping", func(ctx context.Context, c *app.RequestContext) {
-//		c.JSON(consts.StatusOK, utils.H{"ping": "pong"})
-//	})
-//
-//	go h.Spin()
-//	time.Sleep(time.Second)
-//	_, _, err := c.Get(context.Background(), nil, "http://127.0.0.1:9229/ping")
-//	assert.Equal(t, "the server closed connection before returning the first response byte. Make sure the server returns 'Connection: close' response header before closing the connection", err.Error())
-//
-//	h = New(
-//		WithOnAccept(func(conn net.Conn) context.Context {
-//			conn.Close()
-//			return context.Background()
-//		}),
-//		WithHostPorts("localhost:9230"))
-//	h.GET("/ping", func(ctx context.Context, c *app.RequestContext) {
-//		c.JSON(consts.StatusOK, utils.H{"ping": "pong"})
-//	})
-//	go h.Spin()
-//	time.Sleep(time.Second)
-//	_, _, err = c.Get(context.Background(), nil, "http://127.0.0.1:9230/ping")
-//	if err == nil {
-//		t.Fatalf("err should not be nil")
-//	}
-//
-//	h = New(
-//		WithOnAccept(func(conn net.Conn) context.Context {
-//			assert.Equal(t, conn.LocalAddr().String(), "127.0.0.1:9231")
-//			return context.Background()
-//		}),
-//		WithHostPorts("localhost:9231"),
-//		WithTransport(standard.NewTransporter))
-//	h.GET("/ping", func(ctx context.Context, c *app.RequestContext) {
-//		c.JSON(consts.StatusOK, utils.H{"ping": "pong"})
-//	})
-//	go h.Spin()
-//	time.Sleep(time.Second)
-//	c.Get(context.Background(), nil, "http://127.0.0.1:9231/ping")
-//}
+func TestOnPrepare(t *testing.T) {
+	w1 := New(
+		WithHostPorts("localhost:9333"),
+		WithOnConnect(func(ctx context.Context, conn network.Conn) context.Context {
+			b, err := conn.Peek(3)
+			assert.Nil(t, err)
+			assert.Equal(t, string(b), "GET")
+			if c, ok := conn.(CloseWithoutResetBuffer); ok {
+				c.CloseNoResetBuffer()
+			} else {
+				conn.Close()
+			}
+			return ctx
+		}))
+	w1.GET("/ping", func(ctx context.Context, c *app.RequestContext) {
+		c.JSON(consts.StatusOK, utils.H{"ping": "pong"})
+	})
+
+	go w1.Spin()
+	time.Sleep(time.Second)
+	_, _, err := c.Get(context.Background(), nil, "http://127.0.0.1:9333/ping")
+	assert.Equal(t, "服务器在返回首个响应字节之前关闭了连接。请确保服务器在关闭连接之前返回 'Connection: close' 响应头", err.Error())
+
+	h2 := New(
+		WithHostPorts("localhost:9331"),
+		WithOnAccept(func(conn net.Conn) context.Context {
+			conn.Close()
+			return context.Background()
+		}))
+	h2.GET("/ping", func(ctx context.Context, c *app.RequestContext) {
+		c.JSON(consts.StatusOK, utils.H{"ping": "pong"})
+	})
+	go h2.Spin()
+	time.Sleep(time.Second)
+	_, _, err = c.Get(context.Background(), nil, "http://127.0.0.1:9331/ping")
+	assert.NotNil(t, err)
+
+	h3 := New(
+		WithHostPorts("localhost:9231"),
+		WithOnAccept(func(conn net.Conn) context.Context {
+			assert.Equal(t, conn.LocalAddr().String(), "127.0.0.1:9231")
+			return context.Background()
+		}),
+		WithTransport(standard.NewTransporter))
+	h3.GET("/ping", func(ctx context.Context, c *app.RequestContext) {
+		c.JSON(consts.StatusOK, utils.H{"ping": "pong"})
+	})
+	go h3.Spin()
+	time.Sleep(time.Second)
+	_, _, err = c.Get(context.Background(), nil, "http://127.0.0.1:9231/ping")
+	fmt.Println(err)
+}
 
 type lockBuffer struct {
 	sync.Mutex

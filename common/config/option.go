@@ -67,7 +67,7 @@ type Options struct {
 	GetOnly                      bool          // 是否仅支持 GET 请求，默认否
 	DisableKeepalive             bool          // 是否禁用长连接，默认否
 	DisablePreParseMultipartForm bool          // 是否不预先解析多部分表单，默认否
-	StreamRequestBody            bool          // 是否流式处理请求正文，默认否
+	StreamRequestBody            bool          // 是否流式处理请求体，默认否
 	NoDefaultServerHeader        bool          // 是否不要默认的服务器名称标头，默认否
 	DisablePrintRoute            bool          // 是否禁止打印路由，默认否
 	Network                      string        // 网络协议，可选 "tcp", "udp", "unix"(unix domain socket)，默认 "tcp"
@@ -82,9 +82,9 @@ type Options struct {
 	TraceLevel                   any   // 跟踪级别，默认 stats.LevelDetailed
 	ListenConfig                 *net.ListenConfig
 
-	BindConfig      any
-	CustomBinder    any
-	CustomValidator any
+	BindConfig      any // 请求参数绑定器的配置项
+	CustomBinder    any // 自定义请求参数绑定器
+	CustomValidator any // 自定义请求参数验证器
 
 	// TransporterNewer 是传输器的自定义创建函数。
 	TransporterNewer func(opt *Options) network.Transporter

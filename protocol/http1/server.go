@@ -45,13 +45,13 @@ func NewServer() *Server {
 
 // Option 表示 HTTP/1.1 服务器选项。
 type Option struct {
-	StreamRequestBody             bool              // 是否流式读取请求正文
+	StreamRequestBody             bool              // 是否流式读取请求体
 	GetOnly                       bool              // 是否仅支持 GET 请求
 	DisablePreParseMultipartForm  bool              // 是否不预先解析多部分表单
 	DisableKeepalive              bool              // 是否禁用长连接
 	NoDefaultServerHeader         bool              // 是否不要默认服务器名称
 	DisableHeaderNamesNormalizing bool              // 是否禁用标头名称的规范化
-	MaxRequestBodySize            int               // 最大请求正文大小
+	MaxRequestBodySize            int               // 最大请求体大小
 	IdleTimeout                   time.Duration     // 闲置连接的超时时长
 	ReadTimeout                   time.Duration     // 读取正文的超时时长
 	ServerName                    []byte            // 服务器名称
@@ -228,7 +228,7 @@ func (s Server) Serve(c context.Context, conn network.Conn) (err error) {
 		// 'Except: 100-continue' 请求处理。
 		// 详见 https://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html#sec8.2.3
 		if ctx.Request.MayContinue() {
-			// 允许拒绝读取后续的请求正文
+			// 允许拒绝读取后续的请求体
 			if s.ContinueHandler != nil {
 				if continueReadingRequest = s.ContinueHandler(&ctx.Request.Header); !continueReadingRequest {
 					ctx.SetStatusCode(consts.StatusExpectationFailed)
@@ -347,7 +347,7 @@ func (s Server) Serve(c context.Context, conn network.Conn) (err error) {
 			}
 		}
 
-		// 释放请求正文流
+		// 释放请求体流
 		if ctx.Request.IsBodyStream() {
 			err = ext.ReleaseBodyStream(ctx.RequestBodyStream())
 			if err != nil {

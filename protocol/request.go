@@ -26,7 +26,7 @@ import (
 var (
 	errMissingFile = errors.NewPublic("http: 无此文件")
 
-	// 请求正文缓冲池，减少 GC
+	// 请求体缓冲池，减少 GC
 	requestBodyPool bytebufferpool.Pool
 
 	// 请求实例池，减少 GC
@@ -104,7 +104,7 @@ func (w *requestBodyWriter) Write(p []byte) (int, error) {
 	return len(p), nil
 }
 
-// AppendBody 追加 p 至请求正文的字节缓冲区。
+// AppendBody 追加 p 至请求体的字节缓冲区。
 //
 // 函数返回后，复用 p 是安全的。
 func (req *Request) AppendBody(p []byte) {
@@ -202,7 +202,7 @@ func (req *Request) BodyBytes() []byte {
 
 // BodyBuffer 返回请求的正文缓冲区。
 //
-// 如果为空，则从请求正文池中获取一个新字节缓冲区。
+// 如果为空，则从请求体池中获取一个新字节缓冲区。
 func (req *Request) BodyBuffer() *bytebufferpool.ByteBuffer {
 	if req.body == nil {
 		req.body = requestBodyPool.Get()
@@ -225,7 +225,7 @@ func (req *Request) BodyWriter() io.Writer {
 	return &req.w
 }
 
-// BodyWriteTo 将请求正文写入 w。
+// BodyWriteTo 将请求体写入 w。
 func (req *Request) BodyWriteTo(w io.Writer) error {
 	if req.IsBodyStream() {
 		zw := network.NewWriter(w)
@@ -339,7 +339,7 @@ func (req *Request) IsBodyStream() bool {
 // 若返回真，调用者必须执行一个如下动作：
 //
 //   - 若请求头不满足调用方的要求，则发送 StatusExpectationFailed 响应。
-//   - 或者在用 ContinueReadBody 读取请求正文之前发送 StatusContinue 响应。
+//   - 或者在用 ContinueReadBody 读取请求体之前发送 StatusContinue 响应。
 //   - 再或者关闭连接。
 func (req *Request) MayContinue() bool {
 	return bytes.Equal(req.Header.peek(bytestr.StrExpect), bytestr.Str100Continue)
@@ -360,7 +360,7 @@ func (req *Request) MultipartFiles() []*File {
 	return req.multipartFiles
 }
 
-// MultipartForm 解析请求正文中的请求表单。
+// MultipartForm 解析请求体中的请求表单。
 //
 // 若请求的内容类型不是 'multipart/form-data' 则返回 errors.ErrNoMultipartForm。
 //
@@ -384,7 +384,7 @@ func (req *Request) MultipartForm() (*multipart.Form, error) {
 			// 这里不关心内存使用情况
 			var err error
 			if body, err = compress.AppendGunzipBytes(nil, body); err != nil {
-				return nil, fmt.Errorf("无法解压缩请求正文：%s", err)
+				return nil, fmt.Errorf("无法解压缩请求体：%s", err)
 			}
 		} else if len(ce) > 0 {
 			return nil, fmt.Errorf("不支持的内容编码：%q", ce)
@@ -398,7 +398,7 @@ func (req *Request) MultipartForm() (*multipart.Form, error) {
 		if bytes.Equal(ce, bytestr.StrGzip) {
 			// 这里不关心内存使用情况
 			if bodyStream, err = gzip.NewReader(bodyStream); err != nil {
-				return nil, fmt.Errorf("无法解压缩请求正文：%w", err)
+				return nil, fmt.Errorf("无法解压缩请求体：%w", err)
 			}
 		} else if len(ce) > 0 {
 			return nil, fmt.Errorf("不支持的内容编码：%q", ce)
@@ -573,7 +573,7 @@ func (req *Request) SetBasicAuth(username, password string) {
 	req.SetHeader(consts.HeaderAuthorization, "Basic "+encodeStr)
 }
 
-// SetBody 设置请求正文。
+// SetBody 设置请求体。
 //
 // 在函数返回后，重新使用 body 参数是安全的。
 func (req *Request) SetBody(body []byte) {
@@ -582,14 +582,14 @@ func (req *Request) SetBody(body []byte) {
 	req.BodyBuffer().Set(body)
 }
 
-// SetBodyString 设置请求正文。
+// SetBodyString 设置请求体。
 func (req *Request) SetBodyString(body string) {
 	req.RemoveMultipartFormFiles()
 	_ = req.CloseBodyStream()
 	req.BodyBuffer().SetString(body)
 }
 
-// SetBodyRaw 设置原始请求正文，但不复制它。
+// SetBodyRaw 设置原始请求体，但不复制它。
 //
 // 基于此，内容体不可修改。
 func (req *Request) SetBodyRaw(body []byte) {
@@ -605,7 +605,7 @@ func (req *Request) SetBodyRaw(body []byte) {
 //
 // 若 bodyStream 实现了 io.Closer，则读取完请求的所有正文数据后调用 bodyStream.Close()。
 //
-// 注意：GET 和 HEAD 请求不能有请求正文。
+// 注意：GET 和 HEAD 请求不能有请求体。
 func (req *Request) SetBodyStream(bodyStream io.Reader, bodySize int) {
 	req.ResetBody()
 	req.bodyStream = bodyStream
@@ -699,7 +699,7 @@ func (req *Request) SetIsTLS(isTLS bool) {
 	req.isTLS = isTLS
 }
 
-// SetMaxKeepBodySize 设置请求正文的最大保留字节数。
+// SetMaxKeepBodySize 设置请求体的最大保留字节数。
 func (req *Request) SetMaxKeepBodySize(n int) {
 	req.maxKeepBodySize = n
 }
@@ -753,7 +753,7 @@ func (req *Request) SetRequestURI(requestURI string) {
 	req.parsedURI = false
 }
 
-// SwapBody 将请求正文与指定正文交换，并返回请求正文。
+// SwapBody 将请求体与指定正文交换，并返回请求体。
 //
 // 禁止在函数返回后修改传递给 SwapBody 的正文。
 func (req *Request) SwapBody(body []byte) []byte {

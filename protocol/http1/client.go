@@ -35,7 +35,7 @@ var (
 	clientConnPool sync.Pool
 
 	errTimeout          = errs.New(errs.ErrTimeout, errs.ErrorTypePublic, "host client")
-	errConnectionClosed = errs.NewPublic("服务器在返回响应前已关闭了连接。要确保服务器在关闭连接前返回 'Connection: close' 响应头")
+	errConnectionClosed = errs.NewPublic("服务器在返回首个响应字节之前关闭了连接。请确保服务器在关闭连接之前返回 'Connection: close' 响应头")
 )
 
 type ClientOptions struct {

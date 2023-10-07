@@ -97,12 +97,12 @@ func (b *defaultBinder) Name() string {
 	return "wind"
 }
 
-func (b *defaultBinder) Bind(req *protocol.Request, v any, params param.Params) error {
-	return b.bindTag(req, v, params, "")
-}
-
 func (b *defaultBinder) BindAndValidate(req *protocol.Request, v any, params param.Params) error {
 	return b.bindTagAndValidate(req, v, params, "")
+}
+
+func (b *defaultBinder) Bind(req *protocol.Request, v any, params param.Params) error {
+	return b.bindTag(req, v, params, "")
 }
 
 func (b *defaultBinder) BindPath(req *protocol.Request, v any, params param.Params) error {
@@ -372,6 +372,7 @@ func (v *validator) Engine() any {
 	return v.validate
 }
 
+// ValidateTag 返回验证标签。
 func (v *validator) ValidateTag() string {
 	return v.validateTag
 }

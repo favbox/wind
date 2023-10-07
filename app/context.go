@@ -66,9 +66,12 @@ type RequestContext struct {
 
 	// 通过自定义函数获取表单值
 	formValueFunc FormValueFunc
+
+	binder    binding.Binder          // 请求参数绑定器
+	validator binding.StructValidator // 请求参数验证器
 }
 
-// NewContext 创建一个指定初始最大路由参数的无请求/响应信息的纯粹上下文。
+// NewContext 创建一个指定最大路由参数个数的且不包含请求/响应信息的纯上下文。
 func NewContext(maxParams uint16) *RequestContext {
 	v := make(param.Params, 0, maxParams)
 	ctx := &RequestContext{Params: v, index: -1}
@@ -308,6 +311,16 @@ func (ctx *RequestContext) SetClientIPFunc(fn ClientIP) {
 // SetFormValueFunc 设置获取表单值的自定义函数。
 func (ctx *RequestContext) SetFormValueFunc(f FormValueFunc) {
 	ctx.formValueFunc = f
+}
+
+// SetBinder 设置请求参数绑定器。
+func (ctx *RequestContext) SetBinder(binder binding.Binder) {
+	ctx.binder = binder
+}
+
+// SetValidator 设置请求参数验证器。
+func (ctx *RequestContext) SetValidator(validator binding.StructValidator) {
+	ctx.validator = validator
 }
 
 // QueryArgs 返回请求 URL 中的查询参数。
@@ -695,12 +708,51 @@ func (ctx *RequestContext) GetPostForm(key string) (string, bool) {
 
 // BindAndValidate 绑定上下文的请求数据到 obj 并按需验证。 注意：obj 应为一个指针。
 func (ctx *RequestContext) BindAndValidate(obj any) error {
-	return binding.BindAndValidate(&ctx.Request, obj, ctx.Params)
+	return ctx.getBinder().BindAndValidate(&ctx.Request, obj, ctx.Params)
 }
 
 // Bind 绑定上下文的请求数据到 obj。注意：obj 应为一个指针。
 func (ctx *RequestContext) Bind(obj any) error {
-	return binding.Bind(&ctx.Request, obj, ctx.Params)
+	return ctx.getBinder().Bind(&ctx.Request, obj, ctx.Params)
+}
+
+// BindPath 从上下文绑定路由参数到带有 'path' 标签的 obj。它只会使用 'path' 标签进行绑定。
+// 注意：obj 应为一个指针。
+func (ctx *RequestContext) BindPath(obj any) error {
+	return ctx.getBinder().BindPath(&ctx.Request, obj, ctx.Params)
+}
+
+// BindQuery 从上下文绑定查询参数到带有 'query' 标签的 obj。它只会使用 'query' 标签进行绑定。
+// 注意：obj 应为一个指针。
+func (ctx *RequestContext) BindQuery(obj any) error {
+	return ctx.getBinder().BindQuery(&ctx.Request, obj)
+}
+
+// BindHeader 从上下文绑定请求头参数到带有 'header' 标签的 obj。它只会使用 'header' 标签进行绑定。
+// 注意：obj 应为一个指针。
+func (ctx *RequestContext) BindHeader(obj any) error {
+	return ctx.getBinder().BindHeader(&ctx.Request, obj)
+}
+
+// BindForm 从上下文绑定 form 请求体到带有 'form' 标签的 obj。它只会使用 'form' 标签进行绑定。
+// 注意：obj 应为一个指针。
+func (ctx *RequestContext) BindForm(obj any) error {
+	if len(ctx.Request.Body()) == 0 {
+		return fmt.Errorf("缺少表单类型的请求体")
+	}
+	return ctx.getBinder().BindForm(&ctx.Request, obj)
+}
+
+// BindJSON 从上下文绑定 JSON 请求体到 obj。
+// 注意：obj 应为一个指针。
+func (ctx *RequestContext) BindJSON(obj any) error {
+	return ctx.getBinder().BindJSON(&ctx.Request, obj)
+}
+
+// BindProtobuf 从上下文绑定 protobuf 请求体到 obj。
+// 注意：obj 应为一个指针。
+func (ctx *RequestContext) BindProtobuf(obj any) error {
+	return ctx.getBinder().BindProtobuf(&ctx.Request, obj)
 }
 
 // Validate  用 "vd" 标签验证 obj。
@@ -709,7 +761,7 @@ func (ctx *RequestContext) Bind(obj any) error {
 //   - obj 应为一个指针。
 //   - 验证应在 Bind 之后再调用。
 func (ctx *RequestContext) Validate(obj any) error {
-	return binding.Validate(obj)
+	return ctx.getValidator().ValidateStruct(obj)
 }
 
 // RemoteAddr 返回当前请求的远程计算机的IP地址或域名。
@@ -1040,6 +1092,10 @@ func (ctx *RequestContext) Copy() *RequestContext {
 	paramsCopy := make([]param.Param, len(cp.Params))
 	copy(paramsCopy, cp.Params)
 	cp.Params = paramsCopy
+	cp.clientIPFunc = ctx.clientIPFunc
+	cp.formValueFunc = ctx.formValueFunc
+	cp.binder = ctx.binder
+	cp.validator = ctx.validator
 	return cp
 }
 
@@ -1068,6 +1124,20 @@ func bodyAllowedForStatus(status int) bool {
 	return true
 }
 
+func (ctx *RequestContext) getBinder() binding.Binder {
+	if ctx.binder != nil {
+		return ctx.binder
+	}
+	return binding.DefaultBinder()
+}
+
+func (ctx *RequestContext) getValidator() binding.StructValidator {
+	if ctx.validator != nil {
+		return ctx.validator
+	}
+	return binding.DefaultValidator()
+}
+
 func getRedirectStatusCode(statusCode int) int {
 	if statusCode == consts.StatusMovedPermanently ||
 		statusCode == consts.StatusFound ||
@@ -1091,6 +1161,7 @@ type (
 	FormValueFunc func(*RequestContext, string) []byte
 )
 
+// 默认的表单值获取函数。优先级 query > post > form
 var defaultFormValue = func(ctx *RequestContext, key string) []byte {
 	v := ctx.QueryArgs().Peek(key)
 	if len(v) > 0 {
@@ -1128,7 +1199,7 @@ var defaultClientIPOptions = ClientIPOptions{
 
 var defaultClientIP = ClientIPWithOption(defaultClientIPOptions)
 
-// SetClientIPFunc 设置 ClientIP 函数实现自定义 IP 获取方法。
+// SetClientIPFunc 自定义 IP 获取方法。
 // Deprecated: 使用 engine.SetClientIPFunc 替代此方法。
 func SetClientIPFunc(fn ClientIP) {
 	defaultClientIP = fn

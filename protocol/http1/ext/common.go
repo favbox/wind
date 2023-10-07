@@ -59,7 +59,7 @@ func BufferSnippet(b []byte) string {
 	return fmt.Sprintf("%q...%q", bStart, bEnd)
 }
 
-// ReadRawHeaders 读取原始标头（即排除请求正文）。
+// ReadRawHeaders 读取原始标头（即排除请求体）。
 func ReadRawHeaders(dst, buf []byte) ([]byte, int, error) {
 	n := bytes.IndexByte(buf, '\n')
 	if n < 0 {
