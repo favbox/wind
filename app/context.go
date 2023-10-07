@@ -549,7 +549,7 @@ func (ctx *RequestContext) SetFullPath(p string) {
 
 // FullPath 返回匹配路由的完整路径。未找到的路由返回空白字符串。
 //
-//	router.GET("/user/:id", func(c *wind.RequestContext) {
+//	router.GET("/user/:id", func(c context.Context, ctx *app.RequestContext) {
 //	    ctx.FullPath() == "/user/:id" // true
 //	})
 func (ctx *RequestContext) FullPath() string {
