@@ -1009,9 +1009,9 @@ func (ctx *RequestContext) GetStringMapString(key string) (sms map[string]string
 }
 
 // GetStringMapStringSlice 返回给定键关联值的字典形式，当类型错误时返回 map[string][]string(nil)。
-func (ctx *RequestContext) GetStringMapStringSlice(key string) (smss map[string][]string) {
+func (ctx *RequestContext) GetStringMapStringSlice(key string) (ret map[string][]string) {
 	if val, ok := ctx.Get(key); ok && val != nil {
-		smss, _ = val.(map[string][]string)
+		ret, _ = val.(map[string][]string)
 	}
 	return
 }
