@@ -88,3 +88,26 @@ func TestArgsVisitAll(t *testing.T) {
 	})
 	assert.Equal(t, []string{"http", "wind", "hello", "world"}, s)
 }
+
+func TestArgsPeekAll(t *testing.T) {
+	var a Args
+	a.Add("favbox", "wind")
+	a.Add("favbox", "rain")
+	a.Add("favbox", "")
+	a.Add("hello", "world")
+
+	vv := a.PeekAll("favbox")
+	expected := [][]byte{
+		[]byte("wind"),
+		[]byte("rain"),
+		[]byte(nil),
+	}
+	assert.EqualValues(t, expected, vv)
+
+	vv = a.PeekAll("aaaa")
+	assert.Equal(t, 0, len(vv))
+
+	vv = a.PeekAll("hello")
+	expected = [][]byte{[]byte("world")}
+	assert.Equal(t, expected, vv)
+}

@@ -128,6 +128,17 @@ func (a *Args) PeekExists(key string) (string, bool) {
 	return peekArgStrExists(a.args, key)
 }
 
+// PeekAll 返回给定键的所有参数值。
+func (a *Args) PeekAll(key string) [][]byte {
+	var values [][]byte
+	a.VisitAll(func(k, v []byte) {
+		if bytesconv.B2s(k) == key {
+			values = append(values, v)
+		}
+	})
+	return values
+}
+
 // VisitAll 对每个参数执行 f，类似于map。
 // f 在返回后不能保留对 key 和 value 的引用。
 // 如果需要你得制作 key/value 的副本。

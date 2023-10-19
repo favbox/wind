@@ -44,7 +44,7 @@ func S2b(s string) (b []byte) {
 	return b
 }
 
-// AppendQuotedArg 向 dst 追加转义后的 src 参数。等效 url.QuoteEscape。
+// AppendQuotedArg 向 dst 追加转义后的 src 参数。等效 url.QueryEscape。
 func AppendQuotedArg(dst, src []byte) []byte {
 	for _, c := range src {
 		switch {
@@ -59,7 +59,7 @@ func AppendQuotedArg(dst, src []byte) []byte {
 	return dst
 }
 
-// AppendQuotedPath 向 dst 追加转义后的 src 路径。等效于 url.EscapedPath。
+// AppendQuotedPath 向 dst 追加转义后的 src 路径。等效于 url.PathEscape。
 func AppendQuotedPath(dst, src []byte) []byte {
 	// 修复该问题 https://github.com/golang/go/issues/11202
 	if len(src) == 1 && src[0] == '*' {

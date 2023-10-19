@@ -557,6 +557,10 @@ func (ctx *RequestContext) FullPath() string {
 }
 
 // Redirect 重定向网址。
+// 注意，Redirect 不会中断当前处理器的后续处理器，如需中断请显示中断。
+//
+//	ctx.Abort()
+//	return
 func (ctx *RequestContext) Redirect(statusCode int, uri []byte) {
 	ctx.redirect(uri, statusCode)
 }
