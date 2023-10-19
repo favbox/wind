@@ -114,6 +114,8 @@ func NewWriter(w io.Writer) Writer {
 
 type ExtWriter interface {
 	io.Writer
+
+	// Flush 将数据写入客户端。
 	Flush() error
 
 	// Finalize 将在 Writer 被释放之前被框架调用。

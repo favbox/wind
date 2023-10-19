@@ -78,6 +78,7 @@ func (c *chunkedBodyWriter) release() {
 	chunkReaderPool.Put(c)
 }
 
+// NewChunkedBodyWriter 创建一个分块响应体写入器。
 func NewChunkedBodyWriter(r *protocol.Response, w network.Writer) network.ExtWriter {
 	extWriter := chunkReaderPool.Get().(*chunkedBodyWriter)
 	extWriter.r = r

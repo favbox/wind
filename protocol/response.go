@@ -61,7 +61,7 @@ type Response struct {
 	// 并发网络连接的本地 TCP 地址
 	laddr net.Addr
 
-	// If set a hijackWriter, wind will skip the default header/body writer process.
+	// 若设置劫持写入器，wind 将跳过默认的响应头/体的写入过程。
 	hijackWriter network.ExtWriter
 }
 
@@ -252,7 +252,7 @@ func (resp *Response) HasBodyBytes() bool {
 	return len(resp.BodyBytes()) != 0
 }
 
-// HijackWriter 设置 hijack 写入器。
+// HijackWriter 设置劫持写入器。
 func (resp *Response) HijackWriter(writer network.ExtWriter) {
 	resp.hijackWriter = writer
 }
