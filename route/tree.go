@@ -521,7 +521,7 @@ func (r *router) insert(path string, h app.HandlersChain, t kind, ppath string, 
 		} else {
 			// 节点已存在
 			if currentNode.handlers != nil && h != nil {
-				panic("已为路径注册处理器 '" + ppath + "'")
+				panic("路径的处理器不可重复注册 '" + ppath + "'")
 			}
 
 			if h != nil {

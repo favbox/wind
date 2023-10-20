@@ -502,7 +502,7 @@ func (ctx *RequestContext) ClientIP() string {
 }
 
 // Next 仅限中间件内部使用。
-// 它将执行当前处理链内部所有挂起的处理器。
+// 将执行当前处理链所有挂起的处理器。
 func (ctx *RequestContext) Next(c context.Context) {
 	ctx.index++
 	for ctx.index < int8(len(ctx.handlers)) {

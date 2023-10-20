@@ -17,7 +17,7 @@ func main() {
 	w.GET("/sse", func(ctx context.Context, c *app.RequestContext) {
 		// 客户端可用 Last-Event-ID 标头告知服务端它最后收到的事件
 		lastEventID := sse.GetLastEventID(c)
-		wlog.CtxInfof(ctx, "最新事件编号：%s", lastEventID)
+		wlog.CtxInfof(ctx, "上次事件编号：%s", lastEventID)
 
 		// 你必须在首次调用渲染前设置状态码和响应头
 		c.SetStatusCode(consts.StatusOK)

@@ -29,7 +29,8 @@ type Stream struct {
 	w network.ExtWriter
 }
 
-// NewStream 为发布事件创建一个新的流。
+// NewStream 为指定上下文发布事件创建一个新的流。
+// 底层本质是劫持响应编写器。
 func NewStream(c *app.RequestContext) *Stream {
 	c.Response.Header.SetContentType(ContentType)
 	if c.Response.Header.Get(cacheControl) == "" {

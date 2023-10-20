@@ -6,7 +6,7 @@ import (
 )
 
 // HandlerFunc 是请求处理器函数。
-type HandlerFunc func(c context.Context, ctx *RequestContext)
+type HandlerFunc func(ctx context.Context, c *RequestContext)
 
 // HandlersChain 是一组请求处理器函数。
 type HandlersChain []HandlerFunc
