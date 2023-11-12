@@ -369,11 +369,6 @@ func (s Server) Serve(c context.Context, conn network.Conn) (err error) {
 			return
 		}
 
-		// 跟踪器处理完成情况
-		if s.EnableTrace {
-			traceCtl.DoFinish(cc, ctx, err)
-		}
-
 		// 连接已关闭，则退出 for 循环
 		if connectionClose {
 			return errShortConnection
@@ -383,6 +378,11 @@ func (s Server) Serve(c context.Context, conn network.Conn) (err error) {
 		// 目前，只有 netpoll 的网络模式由此特性，标准库的 IdleTimeout 赋值为 0 时会被改为写 -1。
 		if s.IdleTimeout == 0 {
 			return
+		}
+
+		// 跟踪器处理完成情况
+		if s.EnableTrace {
+			traceCtl.DoFinish(cc, ctx, err)
 		}
 
 		ctx.ResetWithoutConn()
