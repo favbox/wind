@@ -1,0 +1,5 @@
+# 自动检测文本文件，并将行尾标准化为LF（换行符）。
+* text=auto eol=lf
+
+# 自动检测 shell 脚本，并将行尾标准化为LF（换行符）。以便在 Unix 上访问从 Windows 上共享的文件也能工作。
+*.sh text eol=lf
