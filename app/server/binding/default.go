@@ -289,7 +289,7 @@ func (b *defaultBinder) preBindBody(req *protocol.Request, v any) error {
 	}
 	ct := bytesconv.B2s(req.Header.ContentType())
 	switch utils.FilterContentType(ct) {
-	case consts.MIMEApplicationJSON:
+	case consts.MIMEApplicationJSON, consts.MIMEApplicationJSONUTF8:
 		return wjson.Unmarshal(req.Body(), v)
 	case consts.MIMEPROTOBUF:
 		msg, ok := v.(proto.Message)

@@ -13,7 +13,7 @@ type serverFactory struct {
 	option *http1.Option
 }
 
-// New 实现了 在 engine.Run() 期间由 Wind 调用。
+// New 在 engine.Run() 期间被 Wind 调用。
 func (s *serverFactory) New(core suite.Core) (server protocol.Server, err error) {
 	srv := http1.NewServer()
 	srv.Option = *s.option

@@ -63,7 +63,7 @@ type Option struct {
 	HijackConnHandle func(c network.Conn, h app.HijackHandler) // 劫持连接处理器
 }
 
-// Server 表示 HTTP/1.1 服务器。 实现 protocol.Server 协议接口。
+// Server 表示 HTTP/1.1 服务器。实现 protocol.Server 协议接口。
 type Server struct {
 	Option
 	Core suite.Core
@@ -72,7 +72,7 @@ type Server struct {
 	eventStackPool *sync.Pool
 }
 
-// Serve 提供连接服务。
+// Serve 提供 HTTP/1.1 连接服务。
 func (s Server) Serve(c context.Context, conn network.Conn) (err error) {
 	var (
 		zr network.Reader
