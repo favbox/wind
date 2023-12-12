@@ -108,7 +108,7 @@ func (s Server) Serve(c context.Context, conn network.Conn) (err error) {
 
 	defer func() {
 		if s.EnableTrace {
-			if err != nil && !errors.Is(err, errs.ErrIdleTimeout) && !errors.Is(err, errs.ErrHijacked) {
+			if shouldRecordInTraceError(err) {
 				ctx.GetTraceInfo().Stats().SetError(err)
 			}
 			// 如果出现错误，我们需要触发所有事件
@@ -450,4 +450,23 @@ func (e *eventStack) pop() func(ti traceinfo.TraceInfo, err error) {
 	last := (*e)[len(*e)-1]
 	*e = (*e)[:len(*e)-1]
 	return last
+}
+
+func shouldRecordInTraceError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	if errors.Is(err, errs.ErrIdleTimeout) {
+		return false
+	}
+	if errors.Is(err, errs.ErrHijacked) {
+		return false
+	}
+
+	if errors.Is(err, errs.ErrShortConnection) {
+		return false
+	}
+
+	return true
 }

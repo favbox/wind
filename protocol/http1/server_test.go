@@ -431,3 +431,13 @@ func TestExpect100ContinueHandler(t *testing.T) {
 	assert.Equal(t, consts.StatusExpectationFailed, response.StatusCode())
 	assert.Equal(t, "", string(response.Body()))
 }
+
+func TestShouldRecordInTraceError(t *testing.T) {
+	assert.False(t, shouldRecordInTraceError(nil))
+	assert.False(t, shouldRecordInTraceError(errHijacked))
+	assert.False(t, shouldRecordInTraceError(errIdleTimeout))
+	assert.False(t, shouldRecordInTraceError(errShortConnection))
+
+	assert.True(t, shouldRecordInTraceError(errTimeout))
+	assert.True(t, shouldRecordInTraceError(errors.New("foo error")))
+}
