@@ -52,13 +52,15 @@ var (
 	// 默认网络传输器（基于标准库实现，另外可选 netpoll.NewTransporter）
 	defaultTransporter = standard.NewTransporter
 
-	errInitFailed       = errs.NewPrivate("路由引擎已被初始化")
+	errInitFailed       = errs.NewPrivate("路由引擎已经初始化")
 	errAlreadyRunning   = errs.NewPrivate("路由引擎已在运行中")
 	errStatusNotRunning = errs.NewPrivate("路由引擎未在运行中")
 
-	default404Body = []byte("404 页面未找到")
+	default404Body = []byte("404 资源未找到")
 	default405Body = []byte("405 方法不允许")
 	default400Body = []byte("400 错误请求")
+
+	requiredHostBody = []byte("缺少必需的主机标头")
 )
 
 // CtxCallback 引擎启动时，依次触发的钩子函数
@@ -486,6 +488,13 @@ func (engine *Engine) ServeHTTP(c context.Context, ctx *app.RequestContext) {
 	}
 
 	rPath := string(ctx.Request.URI().Path())
+
+	// 对齐 https://datatracker.ietf.org/doc/html/rfc2616#section-5.2
+	if len(ctx.Request.Host()) == 0 && ctx.Request.Header.IsHTTP11() && bytesconv.B2s(ctx.Request.Method()) != consts.MethodConnect {
+		serveError(c, ctx, consts.StatusBadRequest, requiredHostBody)
+		return
+	}
+
 	httpMethod := bytesconv.B2s(ctx.Request.Header.Method())
 	unescape := false
 	if engine.options.UseRawPath {

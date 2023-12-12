@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/internal/bytesconv"
 	"github.com/favbox/wind/internal/bytestr"
 	"github.com/favbox/wind/internal/nocopy"
@@ -88,6 +89,33 @@ func (u *URI) FullURI() []byte {
 // Parse 解析 host/uri 为 URI。两者必有一个携带 scheme 和 host。
 func (u *URI) Parse(host, uri []byte) {
 	u.parse(host, uri, false)
+}
+
+// 原始URL可能形如 scheme:path。
+// （scheme 必须是 [a-zA-Z][a-zA-Z0-9+-.]*）
+// 如此，返回 scheme, path；否则返回 nil, rawURL。
+func getScheme(rawURL []byte) (scheme, path []byte) {
+	for i := 0; i < len(rawURL); i++ {
+		c := rawURL[i]
+		switch {
+		case 'a' <= c && c <= 'z' || 'A' <= c && c <= 'Z':
+			// 什么都不做
+		case '0' <= c && c <= '9' || c == '+' || c == '-' || c == '.':
+			if i == 0 {
+				return nil, rawURL
+			}
+		case c == ':':
+			if i == 0 {
+				wlog.Errorf("错误发生于尝试解析原始URL(%s): 缺少协议方案")
+				return nil, nil
+			}
+			return rawURL[:i], rawURL[i+1:]
+		default:
+			// 我们遇到了无效字符，因此没有又要的方案
+			return nil, rawURL
+		}
+	}
+	return nil, rawURL
 }
 
 func (u *URI) parse(host, uri []byte, isTLS bool) {
@@ -432,6 +460,9 @@ func (u *URI) updateBytes(newURI, buf []byte) []byte {
 		if len(u.scheme) > 0 {
 			schemeOriginal = append([]byte(nil), u.scheme...)
 		}
+		if n == 0 {
+			newURI = bytes.Join([][]byte{u.scheme, bytestr.StrColon, newURI}, nil)
+		}
 		u.Parse(nil, newURI)
 		if len(schemeOriginal) > 0 && len(u.scheme) == 0 {
 			u.scheme = append(u.scheme[:0], schemeOriginal...)
@@ -473,22 +504,16 @@ func (u *URI) updateBytes(newURI, buf []byte) []byte {
 }
 
 func splitHostURI(host, uri []byte) ([]byte, []byte, []byte) {
-	n := bytes.Index(uri, bytestr.StrSlashSlash)
-	if n < 0 {
+	scheme, path := getScheme(uri)
+
+	if scheme == nil {
 		return bytestr.StrHTTP, host, uri
 	}
-	scheme := uri[:n]
-	if bytes.IndexByte(scheme, '/') >= 0 {
-		return bytestr.StrHTTP, host, uri
-	}
-	if len(scheme) > 0 && scheme[len(scheme)-1] == ':' {
-		scheme = scheme[:len(scheme)-1]
-	}
-	n += len(bytestr.StrSlashSlash)
-	uri = uri[n:]
-	n = bytes.IndexByte(uri, '/')
+
+	uri = path[len(bytestr.StrSlashSlash):]
+	n := bytes.IndexByte(uri, '/')
 	if n < 0 {
-		// 处理 foobar.com?a=b 这种域名后面没有斜线的情况
+		// 兼容主机后面没有/的情况，如 foobar.com?a=b
 		if n = bytes.IndexByte(uri, '?'); n >= 0 {
 			return scheme, uri[:n], uri[n:]
 		}

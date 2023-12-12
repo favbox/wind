@@ -230,7 +230,7 @@ func TestNotAbsolutePath(t *testing.T) {
 	go wind.Run()
 	time.Sleep(200 * time.Microsecond)
 
-	s := "POST ?a=b HTTP/1.1\r\nContent-Length: 5\r\nContent-Type: foo/bar\r\n\r\nabcdef4343"
+	s := "POST ?a=b HTTP/1.1\r\nHost: a.b.c\r\nContent-Length: 5\r\nContent-Type: foo/bar\r\n\r\nabcdef4343"
 	zr := mock.NewZeroCopyReader(s)
 
 	ctx := app.NewContext(0)
@@ -241,7 +241,7 @@ func TestNotAbsolutePath(t *testing.T) {
 	assert.Equal(t, consts.StatusOK, ctx.Response.StatusCode())
 	assert.Equal(t, ctx.Request.Body(), ctx.Response.Body())
 
-	s = "POST a?a=b HTTP/1.1\r\nContent-Length: 5\r\nContent-Type: foo/bar\r\n\r\nabcdef4343"
+	s = "POST a?a=b HTTP/1.1\r\nHost: a.b.c\r\nContent-Length: 5\r\nContent-Type: foo/bar\r\n\r\nabcdef4343"
 	zr = mock.NewZeroCopyReader(s)
 
 	ctx = app.NewContext(0)
@@ -265,7 +265,7 @@ func TestNotAbsolutePathWithRawPath(t *testing.T) {
 	go engine.Run()
 	time.Sleep(200 * time.Microsecond)
 
-	s := "POST ?a=b HTTP/1.1\r\nContent-Length: 5\r\nContent-Type: foo/bar\r\n\r\nabcdef4343"
+	s := "POST ?a=b HTTP/1.1\r\nHost: a.b.c\r\nContent-Length: 5\r\nContent-Type: foo/bar\r\n\r\nabcdef4343"
 	zr := mock.NewZeroCopyReader(s)
 
 	ctx := app.NewContext(0)
@@ -276,7 +276,7 @@ func TestNotAbsolutePathWithRawPath(t *testing.T) {
 	assert.Equal(t, consts.StatusBadRequest, ctx.Response.StatusCode())
 	assert.Equal(t, default400Body, ctx.Response.Body())
 
-	s = "POST a?a=b HTTP/1.1\r\nContent-Length: 5\r\nContent-Type: foo/bar\r\n\r\nabcdef4343"
+	s = "POST a?a=b HTTP/1.1\r\nHost: a.b.c\r\nContent-Length: 5\r\nContent-Type: foo/bar\r\n\r\nabcdef4343"
 	zr = mock.NewZeroCopyReader(s)
 
 	ctx = app.NewContext(0)
