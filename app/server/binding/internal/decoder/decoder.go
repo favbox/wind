@@ -68,7 +68,7 @@ func GetReqDecoder(rt reflect.Type, byTag string, config *DecodeConfig) (Decoder
 	}, needValidate, nil
 }
 
-func getFieldDecoder(field reflect.StructField, index int, parentIdx []int, parentJSONName string, byTag string, config *DecodeConfig) ([]fieldDecoder, bool, error) {
+func getFieldDecoder(field reflect.StructField, index int, parentIdx []int, parentJSONName, byTag string, config *DecodeConfig) ([]fieldDecoder, bool, error) {
 	for field.Type.Kind() == reflect.Ptr {
 		field.Type = field.Type.Elem()
 	}
@@ -80,7 +80,7 @@ func getFieldDecoder(field reflect.StructField, index int, parentIdx []int, pare
 		return nil, false, nil
 	}
 
-	// JSONName 形如 'a.b.c'，TODO 表示必填验证?
+	// 形如 'a.b.c' 的 JSONName 用于必填验证。
 	fieldTagInfos, newParentJSONName, needValidate := lookupFieldTags(field, parentJSONName, config)
 	if len(fieldTagInfos) == 0 && !config.DisableDefaultTag {
 		fieldTagInfos = getDefaultFieldTags(field)

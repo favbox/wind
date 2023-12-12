@@ -63,16 +63,16 @@ var (
 	requiredHostBody = []byte("缺少必需的主机标头")
 )
 
+type hijackConn struct {
+	network.Conn
+	e *Engine
+}
+
 // CtxCallback 引擎启动时，依次触发的钩子函数
 type CtxCallback func(ctx context.Context)
 
 // CtxErrCallback 引擎关闭时，同时触发的钩子函数
 type CtxErrCallback func(ctx context.Context) error
-
-type hijackConn struct {
-	network.Conn
-	e *Engine
-}
 
 // Deprecated: 仅用于获取全局默认传输器 - 可能并非引擎真正使用的。
 // 使用 *Engine.GetTransporterName 获取真实使用的传输器。
@@ -155,10 +155,10 @@ type Engine struct {
 	// 路由当前最大参数个数
 	maxParams uint16
 
-	allNoMethod app.HandlersChain // 内置的方法不允许处理器
-	allNoRoute  app.HandlersChain // 内置的路由找不到处理器
-	noRoute     app.HandlersChain // 用户的路由找不到处理器
-	noMethod    app.HandlersChain // 用户的方法不允许处理器
+	allNoMethod app.HandlersChain // 框架级方法不允许处理器
+	allNoRoute  app.HandlersChain // 框架级路由找不到处理器
+	noRoute     app.HandlersChain // 用户级路由找不到处理器
+	noMethod    app.HandlersChain // 用户级方法不允许处理器
 
 	delims     render.Delims     // HTML 模板的分隔符
 	funcMap    template.FuncMap  // HTML 模板的函数映射
@@ -246,17 +246,21 @@ func (engine *Engine) Run() (err error) {
 		}
 	}
 
-	wlog.SystemLogger().Infof("使用网络库=%s", engine.GetTransporterName())
-	err = engine.transport.ListenAndServe(func(ctx context.Context, conn any) error {
-		switch conn := conn.(type) {
-		case network.Conn:
-			err = engine.Serve(ctx, conn)
-		case network.StreamConn:
-			err = engine.ServeStream(ctx, conn)
-		}
-		return err
-	})
+	return engine.listenAndServe()
+}
 
+func (engine *Engine) listenAndServe() error {
+	wlog.SystemLogger().Infof("使用网络库=%s", engine.GetTransporterName())
+	return engine.transport.ListenAndServe(engine.onData)
+}
+
+func (engine *Engine) onData(ctx context.Context, conn any) (err error) {
+	switch conn := conn.(type) {
+	case network.Conn:
+		err = engine.Serve(ctx, conn)
+	case network.StreamConn:
+		err = engine.ServeStream(ctx, conn)
+	}
 	return
 }
 
