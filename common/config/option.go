@@ -85,6 +85,7 @@ type Options struct {
 	ListenConfig                 *net.ListenConfig
 
 	BindConfig      any // 请求参数绑定器的配置项
+	ValidateConfig  any // 请求参数验证器的配置项
 	CustomBinder    any // 自定义请求参数绑定器
 	CustomValidator any // 自定义请求参数验证器
 

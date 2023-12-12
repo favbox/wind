@@ -437,18 +437,24 @@ func (engine *Engine) ServeStream(ctx context.Context, conn network.StreamConn) 
 
 func (engine *Engine) initBinderAndValidator(opt *config.Options) {
 	// 初始化请求参数验证器
-	engine.validator = binding.DefaultValidator()
-
-	// 设置自定义验证器
 	if opt.CustomValidator != nil {
 		customValidator, ok := opt.CustomValidator.(binding.StructValidator)
 		if !ok {
 			panic("自定义验证器未实现 binding.StructValidator 接口")
 		}
 		engine.validator = customValidator
+	} else {
+		engine.validator = binding.NewValidator(binding.NewValidateConfig())
+		if opt.ValidateConfig != nil {
+			vConf, ok := opt.ValidateConfig.(*binding.ValidateConfig)
+			if !ok {
+				panic("opt.ValidateConfig 不是 '*binding.ValidateConfig' 类型")
+			}
+			engine.validator = binding.NewValidator(vConf)
+		}
 	}
 
-	// 设置自定义绑定器
+	// 初始化请求参数绑定器
 	if opt.CustomBinder != nil {
 		customBinder, ok := opt.CustomBinder.(binding.Binder)
 		if !ok {
@@ -463,11 +469,14 @@ func (engine *Engine) initBinderAndValidator(opt *config.Options) {
 	defaultBindConfig.Validator = engine.validator
 	engine.binder = binding.NewBinder(defaultBindConfig)
 	if opt.BindConfig != nil {
-		customBindConfig, ok := opt.BindConfig.(*binding.BindConfig)
+		bConf, ok := opt.BindConfig.(*binding.BindConfig)
 		if !ok {
-			panic("自定义绑定配置无法转换为 binding.BindConfig")
+			panic("opt.BindConfig 不是 '*binding.BindConfig' 类型")
 		}
-		engine.binder = binding.NewBinder(customBindConfig)
+		if bConf.Validator == nil {
+			bConf.Validator = engine.validator
+		}
+		engine.binder = binding.NewBinder(bConf)
 	}
 }
 
