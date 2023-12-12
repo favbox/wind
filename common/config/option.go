@@ -67,6 +67,8 @@ type Options struct {
 	GetOnly                      bool          // 是否仅支持 GET 请求，默认否
 	DisableKeepalive             bool          // 是否禁用长连接，默认否
 	DisablePreParseMultipartForm bool          // 是否不预先解析多部分表单，默认否
+	NoDefaultDate                bool          // 禁止响应头添加 Date 的默认字段值，默认否
+	NoDefaultContentType         bool          // 禁止响应头添加 Content-Type 的默认字段值，默认否
 	StreamRequestBody            bool          // 是否流式处理请求体，默认否
 	NoDefaultServerHeader        bool          // 是否不要默认的服务器名称标头，默认否
 	DisablePrintRoute            bool          // 是否禁止打印路由，默认否

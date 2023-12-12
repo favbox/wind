@@ -50,6 +50,8 @@ type Option struct {
 	DisablePreParseMultipartForm  bool              // 是否不预先解析多部分表单
 	DisableKeepalive              bool              // 是否禁用长连接
 	NoDefaultServerHeader         bool              // 是否不要默认服务器名称
+	NoDefaultDate                 bool              // 禁止响应头添加 Date 字段，默认否
+	NoDefaultContentType          bool              // 禁止响应头添加 Content-Type 字段，默认否
 	DisableHeaderNamesNormalizing bool              // 是否禁用标头名称的规范化
 	MaxRequestBodySize            int               // 最大请求体大小
 	IdleTimeout                   time.Duration     // 闲置连接的超时时长
@@ -166,12 +168,15 @@ func (s Server) Serve(c context.Context, conn network.Conn) (err error) {
 
 		// 跟踪器记录请求开始和结束信息。
 		if s.EnableTrace {
-			traceCtl.DoStart(c, ctx)
+			cc = traceCtl.DoStart(c, ctx)
 			internalStats.Record(ctx.GetTraceInfo(), stats.ReadHeaderStart, err)
 			eventsToTrigger.push(func(ti traceinfo.TraceInfo, err error) {
 				internalStats.Record(ti, stats.ReadHeaderFinish, err)
 			})
 		}
+
+		ctx.Response.Header.SetNoDefaultDate(s.NoDefaultDate)
+		ctx.Response.Header.SetNoDefaultContentType(s.NoDefaultContentType)
 
 		if s.DisableHeaderNamesNormalizing {
 			ctx.Request.Header.DisableNormalizing()

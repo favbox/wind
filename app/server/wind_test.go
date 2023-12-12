@@ -759,3 +759,30 @@ func TestSilentMode(t *testing.T) {
 		t.Fatalf("unexpected error in log: %s", b.String())
 	}
 }
+
+func TestWithDisableDefaultDate(t *testing.T) {
+	h := New(
+		WithHostPorts("localhost:8321"),
+		WithDisableDefaultDate(true),
+	)
+	h.GET("/", func(_ context.Context, c *app.RequestContext) {})
+	go h.Spin()
+	time.Sleep(100 * time.Millisecond)
+	hc := http.Client{Timeout: time.Second}
+	r, _ := hc.Get("http://127.0.0.1:8321") //nolint:errcheck
+	assert.Equal(t, "", r.Header.Get("Date"))
+}
+
+func TestWithDisableDefaultContentType(t *testing.T) {
+	h := New(
+		WithHostPorts("localhost:8324"),
+		WithDisableDefaultContentType(true),
+	)
+	h.GET("/", func(_ context.Context, c *app.RequestContext) {})
+	go h.Spin()
+	time.Sleep(100 * time.Millisecond)
+	hc := http.Client{Timeout: time.Second}
+	r, _ := hc.Get("http://127.0.0.1:8324") //nolint:errcheck
+	assert.Equal(t, "", r.Header.Get("Content-Type"))
+	fmt.Println(r.Header)
+}

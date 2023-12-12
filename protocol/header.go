@@ -1522,9 +1522,14 @@ func (h *ResponseHeader) SetHeaderLength(length int) {
 	h.headerLength = length
 }
 
-// SetNoDefaultContentType 设置不用默认的内容类型。
+// SetNoDefaultContentType 设置响应头是否输出默认的 Content-Type 字段。
 func (h *ResponseHeader) SetNoDefaultContentType(b bool) {
 	h.noDefaultContentType = b
+}
+
+// SetNoDefaultDate 设置响应头是否输出默认的 Date 字段。
+func (h *ResponseHeader) SetNoDefaultDate(b bool) {
+	h.noDefaultDate = b
 }
 
 // SetProtocol 设置响应头使用的 HTTP 协议。

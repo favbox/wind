@@ -348,3 +348,17 @@ func WithCustomValidator(bc *binding.BindConfig) config.Option {
 		o.CustomValidator = bc
 	}}
 }
+
+// WithDisableDefaultDate 设置是否禁止响应头添加 Date 的默认字段值。
+func WithDisableDefaultDate(disable bool) config.Option {
+	return config.Option{F: func(o *config.Options) {
+		o.NoDefaultDate = disable
+	}}
+}
+
+// WithDisableDefaultContentType 设置是否禁止响应头添加 Content-Type 的默认字段值。
+func WithDisableDefaultContentType(disable bool) config.Option {
+	return config.Option{F: func(o *config.Options) {
+		o.NoDefaultContentType = disable
+	}}
+}

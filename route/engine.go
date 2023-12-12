@@ -879,6 +879,8 @@ func newHttp1OptionFromEngine(engine *Engine) *http1.Option {
 		ContinueHandler:               engine.ContinueHandler,
 		HijackConnHandle:              engine.HijackConnHandle,
 		DisableHeaderNamesNormalizing: engine.options.DisableHeaderNamesNormalizing,
+		NoDefaultDate:                 engine.options.NoDefaultDate,
+		NoDefaultContentType:          engine.options.NoDefaultContentType,
 	}
 	// 标准库的空闲超时必不能为零，若为 0 则置为 -1。
 	// 由于网络库的触发方式不同，具体原因请参阅该值的实际使用情况。
