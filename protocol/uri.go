@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/favbox/wind/common/wlog"
 	"github.com/favbox/wind/internal/bytesconv"
 	"github.com/favbox/wind/internal/bytestr"
 	"github.com/favbox/wind/internal/nocopy"
@@ -105,11 +104,7 @@ func getScheme(rawURL []byte) (scheme, path []byte) {
 				return nil, rawURL
 			}
 		case c == ':':
-			if i == 0 {
-				wlog.Errorf("错误发生于尝试解析原始URL(%s): 缺少协议方案")
-				return nil, nil
-			}
-			return rawURL[:i], rawURL[i+1:]
+			return checkSchemeWhenCharIsColon(i, rawURL)
 		default:
 			// 我们遇到了无效字符，因此没有又要的方案
 			return nil, rawURL
