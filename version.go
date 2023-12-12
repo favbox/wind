@@ -3,5 +3,5 @@ package wind
 // 用于统计和调试的框架名称及版本信息。
 const (
 	Name    = "Wind"
-	Version = "v0.7.2"
+	Version = "v0.7.3"
 )
