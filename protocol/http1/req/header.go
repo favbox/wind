@@ -8,6 +8,7 @@ import (
 
 	errs "github.com/favbox/wind/common/errors"
 	"github.com/favbox/wind/common/utils"
+	"github.com/favbox/wind/internal/bytesconv"
 	"github.com/favbox/wind/internal/bytestr"
 	"github.com/favbox/wind/network"
 	"github.com/favbox/wind/protocol"
@@ -15,7 +16,7 @@ import (
 	"github.com/favbox/wind/protocol/http1/ext"
 )
 
-var errEOFReadHeader = errs.NewPublic("读取请求标头错出错：EOF")
+var errEOFReadHeader = errs.NewPublic("无法读取请求头：EOF")
 
 // WriteHeader 写入请求头 h 至 w。
 func WriteHeader(h *protocol.RequestHeader, w network.Writer) error {
@@ -130,6 +131,16 @@ func parseFirstLine(h *protocol.RequestHeader, buf []byte) (int, error) {
 	return len(buf) - len(bNext), nil
 }
 
+// validHeaderFieldValue 等价于 httpguts.ValidHeaderFieldValue（共享相同的上下文）
+func validHeaderFieldValue(val []byte) bool {
+	for _, v := range val {
+		if bytesconv.ValidHeaderFieldValueTable[v] == 0 {
+			return false
+		}
+	}
+	return true
+}
+
 func parseHeaders(h *protocol.RequestHeader, buf []byte) (int, error) {
 	h.InitContentLengthWithValue(-2)
 
@@ -143,7 +154,13 @@ func parseHeaders(h *protocol.RequestHeader, buf []byte) (int, error) {
 			// 详见 RFC 7230, Section 3.2.4.
 			if bytes.IndexByte(s.Key, ' ') != -1 || bytes.IndexByte(s.Key, '\t') != -1 {
 				err = fmt.Errorf("无效的标头键名 %q", s.Key)
-				continue
+				return 0, err
+			}
+
+			// 检查标头值中的无效字符
+			if !validHeaderFieldValue(s.Value) {
+				err = fmt.Errorf("无效的标头值 %q", s.Value)
+				return 0, err
 			}
 
 			switch s.Key[0] | 0x20 {

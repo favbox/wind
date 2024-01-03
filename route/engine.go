@@ -379,7 +379,7 @@ func (engine *Engine) Serve(ctx context.Context, conn network.Conn) (err error) 
 		errProcess(conn, err)
 	}()
 
-	// H2C 协议
+	// H2C 即 HTTP/2 的明文协议，无需使用TLS，常用于开发或测试环境
 	if engine.options.H2C {
 		// 协议嗅探器
 		buf, _ := conn.Peek(len(bytestr.StrClientPreface))

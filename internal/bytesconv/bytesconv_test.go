@@ -9,6 +9,7 @@ import (
 	"github.com/favbox/wind/common/mock"
 	"github.com/favbox/wind/network"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/net/http/httpguts"
 )
 
 func TestAppendQuotedArg(t *testing.T) {
@@ -233,4 +234,23 @@ func testReadHexInt(t *testing.T, s string, expectedN int) {
 		t.Errorf("异常错误：%q. s=%s", err, s)
 	}
 	assert.Equal(t, n, expectedN)
+}
+
+func TestValidHeaderFieldValueTable(t *testing.T) {
+	t.Parallel()
+
+	// Test all characters
+	allBytes := make([]byte, 0)
+	for i := 0; i < 256; i++ {
+		allBytes = append(allBytes, byte(i))
+	}
+	for _, s := range allBytes {
+		ss := []byte{s}
+		expectedS := httpguts.ValidHeaderFieldValue(string(ss))
+		res := func() bool {
+			return ValidHeaderFieldValueTable[s] != 0
+		}()
+
+		assert.Equal(t, expectedS, res)
+	}
 }

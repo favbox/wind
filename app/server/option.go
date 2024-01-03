@@ -161,23 +161,23 @@ func WithMaxKeepBodySize(bs int) config.Option {
 	}}
 }
 
-// WithGetOnly 只接受 GET 请求，默认值：false。
+// WithGetOnly 设置是否只接受 GET 请求，默认值：false。
 func WithGetOnly(isOnly bool) config.Option {
 	return config.Option{F: func(o *config.Options) {
 		o.GetOnly = isOnly
 	}}
 }
 
-// WithKeepAlive 禁用长连接。默认值：false。
+// WithKeepAlive 设置是否使用长连接。默认值：false。
 func WithKeepAlive(b bool) config.Option {
 	return config.Option{F: func(o *config.Options) {
 		o.DisableKeepalive = !b
 	}}
 }
 
-// WithStreamBody 在流中读取正文。
+// WithStreamBody 设置是否在流中读取正文。
 //
-// 启用流式处理，可在请求的正文超过当前字节数限制时，更快地调用处理器。
+// 启用流式处理，可在请求体超过当前字节数限制时，更快地调用处理器。
 //
 // 默认值：false，不启用流式正文。
 func WithStreamBody(b bool) config.Option {
@@ -332,6 +332,13 @@ func WithDisableHeaderNamesNormalizing(disable bool) config.Option {
 func WithBindConfig(bc *binding.BindConfig) config.Option {
 	return config.Option{F: func(o *config.Options) {
 		o.BindConfig = bc
+	}}
+}
+
+// WithValidateConfig 设置请求请求参数验证器的配置项。
+func WithValidateConfig(vc *binding.ValidateConfig) config.Option {
+	return config.Option{F: func(o *config.Options) {
+		o.ValidateConfig = vc
 	}}
 }
 

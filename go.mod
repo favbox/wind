@@ -4,16 +4,16 @@ go 1.20
 
 require (
 	github.com/bytedance/go-tagexpr/v2 v2.9.2
-	github.com/bytedance/gopkg v0.0.0-20230728082804-614d0af6619b
+	github.com/bytedance/gopkg v0.0.0-20231219111115-a5eedbe96960
 	github.com/bytedance/mockey v1.2.6
 	github.com/bytedance/sonic v1.10.1
 	github.com/cloudwego/netpoll v0.5.0
-	github.com/fsnotify/fsnotify v1.6.0
+	github.com/fsnotify/fsnotify v1.7.0
 	github.com/stretchr/testify v1.8.4
 	github.com/tidwall/gjson v1.17.0
-	golang.org/x/net v0.18.0
-	golang.org/x/sync v0.4.0
-	golang.org/x/sys v0.14.0
+	golang.org/x/net v0.19.0
+	golang.org/x/sync v0.5.0
+	golang.org/x/sys v0.15.0
 	google.golang.org/protobuf v1.31.0
 )
 

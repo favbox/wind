@@ -17,6 +17,7 @@ import (
 
 	"github.com/favbox/wind/app"
 	c "github.com/favbox/wind/app/client"
+	"github.com/favbox/wind/app/server/binding"
 	"github.com/favbox/wind/app/server/registry"
 	"github.com/favbox/wind/common/config"
 	errs "github.com/favbox/wind/common/errors"
@@ -758,6 +759,72 @@ func TestSilentMode(t *testing.T) {
 	if strings.Contains(s, "Error") {
 		t.Fatalf("unexpected error in log: %s", b.String())
 	}
+}
+
+func TestWithDisableHeaderNamesNormalizing(t *testing.T) {
+	w := New(
+		WithHostPorts("localhost:9212"),
+		WithDisableHeaderNamesNormalizing(true),
+	)
+	headerName := "CASE-senSITive-HEAder-NAME"
+	headerValue := "foobar-baz"
+	succeed := false
+	w.GET("/test", func(c context.Context, ctx *app.RequestContext) {
+		ctx.VisitAllHeaders(func(key, value []byte) {
+			if string(key) == headerName && string(value) == headerValue {
+				succeed = true
+				return
+			}
+		})
+		if !succeed {
+			t.Fatalf("DisableHeaderNamesNormalizing 失败")
+		} else {
+			ctx.Header(headerName, headerValue)
+		}
+	})
+	go w.Spin()
+	time.Sleep(100 * time.Millisecond)
+
+	cli, _ := c.NewClient(c.WithDisableHeaderNamesNormalizing(true))
+
+	r := protocol.NewRequest("GET", "http://localhost:9212/test", nil)
+	r.Header.DisableNormalizing()
+	r.Header.Set(headerName, headerValue)
+	res := protocol.AcquireResponse()
+	err := cli.Do(context.Background(), r, res)
+	assert.Nil(t, err)
+	assert.Equal(t, headerValue, res.Header.Get(headerName))
+}
+
+func TestWithBindConfig(t *testing.T) {
+	type Req struct {
+		A int `query:"a"`
+	}
+	bindConfig := binding.NewBindConfig()
+	bindConfig.LooseZeroMode = true
+	w := New(
+		WithHostPorts(":9332"),
+		WithBindConfig(bindConfig),
+	)
+	w.GET("/bind", func(c context.Context, ctx *app.RequestContext) {
+		var req Req
+		err := ctx.BindAndValidate(&req)
+		if err != nil {
+			t.Fatal("意外错误")
+		}
+	})
+
+	go w.Spin()
+	time.Sleep(100 * time.Millisecond)
+	hc := http.Client{Timeout: time.Second}
+	_, err := hc.Get("http://127.0.0.1:9332/bind?a=")
+	assert.Nil(t, err)
+}
+
+func TestWithCustomBinder(t *testing.T) {
+}
+
+func TestWithValidateConfig(t *testing.T) {
 }
 
 func TestWithDisableDefaultDate(t *testing.T) {

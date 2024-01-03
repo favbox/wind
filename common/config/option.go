@@ -78,7 +78,7 @@ type Options struct {
 	ExitWaitTimeout              time.Duration // 优雅退出的等待时间，默认 5s
 	TLS                          *tls.Config
 	ALPN                         bool  // 是否打开 ALPN 应用层协议协商的开关，默认否
-	H2C                          bool  // 是否打开 HTTP/2 Cleartext 协议开关，默认否
+	H2C                          bool  // 是否打开 HTTP/2 Cleartext （明文）协议开关，默认否
 	ReadBufferSize               int   // 初始的读缓冲大小，默认 4KB。通常无需设置。
 	Tracers                      []any // 链路跟踪控制器器，默认零长度切片
 	TraceLevel                   any   // 跟踪级别，默认 stats.LevelDetailed
